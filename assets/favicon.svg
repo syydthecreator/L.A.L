@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bronze" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f2e0b8"/>
+      <stop offset="30%" stop-color="#d9b571"/>
+      <stop offset="55%" stop-color="#a3814f"/>
+      <stop offset="75%" stop-color="#c9a468"/>
+      <stop offset="100%" stop-color="#5c4423"/>
+    </linearGradient>
+  </defs>
+  <path d="M42,8 C34,8 28,14 30,22 C31,27 36,30 41,28 L41,60 C41,68 46,74 56,77 C67,80 78,75 82,66 C79,73 71,77 62,75 C52,73 47,68 47,60 L47,24 C50,22 51,17 48,12 C46,9 44,8 42,8 Z" fill="url(#bronze)" stroke="#000" stroke-width="1.5"/>
+</svg>

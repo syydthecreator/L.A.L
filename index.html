@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
+<title>Lucilla Aurelius Launchpad</title>
+<link rel="icon" type="image/png" href="assets/favicon.png" />
+<link rel="apple-touch-icon" href="assets/favicon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Eagle+Lake&family=Pirata+One&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.0/lame.min.js"></script>
+</head>
+<body>
+
+<div class="page">
+
+  <main class="instrument" id="instrument">
+
+    <div class="chassis-face">
+
+      <div class="header-row">
+        <div class="brand-block">
+          <div class="brand-tagline">LUCILLA AURELIUS LAUNCHPAD</div>
+        </div>
+
+        <div class="speaker-grille" aria-hidden="true"></div>
+      </div>
+
+      <div class="lcd" id="lcd">
+        <div class="lcd-top">
+          <span class="lcd-led" id="lcdLed"></span>
+          <span class="lcd-state" id="lcdState">STANDBY</span>
+        </div>
+        <div class="lcd-body">
+          <div class="lcd-icon-grid" id="lcdIconGrid">
+            <div class="lcd-screen-label lcd-label-w2 lcd-label-row1" id="lcdFilterLabel">FILTER</div>
+            <div class="lcd-screen-label lcd-label-w2 lcd-label-row1" id="lcdDelayLabel">DELAY</div>
+            <div class="lcd-shield-icon" id="lcdShieldIcon" aria-hidden="true"></div>
+            <div class="lcd-icon-solo lcd-label-colA lcd-label-row3" id="lcdRecIcon" aria-hidden="true"></div>
+            <div class="lcd-icon-solo lcd-label-colA2 lcd-label-row3" id="lcdPlayIcon" aria-hidden="true"></div>
+            <div class="lcd-icon-solo lcd-label-colA lcd-label-row2" id="lcdRoomIcon"></div>
+            <div class="lcd-icon-solo lcd-label-row1" id="lcdCrushIcon"></div>
+            <div class="lcd-icon-solo lcd-label-colA2 lcd-label-row2" id="lcdRptIcon"></div>
+            <div class="lcd-icon-solo lcd-label-row1" id="lcdLatchIcon"></div>
+            <div class="lcd-icon-solo lcd-label-row1" id="lcdMetroIcon" aria-hidden="true"></div>
+            <div class="lcd-icon-solo lcd-label-row1" id="lcdSwingLabel" aria-hidden="true"></div>
+            <div class="lcd-screen-label lcd-label-w2 lcd-label-colA lcd-label-row4" id="lcdTempoLabel">TEMPO</div>
+            <div class="lcd-screen-label lcd-label-w2 lcd-label-row4" id="lcdEraseLabel">ERASE</div>
+            <div class="lcd-screen-label lcd-label-w2 lcd-label-row4" id="lcdCorrectLabel">CORRECT</div>
+            <div class="lcd-screen-label lcd-label-w2 lcd-label-row4 lcd-shift-square" id="lcdShiftLabel">SHIFT</div>
+            <div class="vol-meter" id="volMeter">
+              <span class="vol-seg" data-seg="4"><span class="vol-bar"></span><span class="vol-bar"></span><span class="vol-bar"></span><span class="vol-bar"></span></span>
+              <span class="vol-seg" data-seg="3"><span class="vol-bar"></span><span class="vol-bar"></span><span class="vol-bar"></span><span class="vol-bar"></span></span>
+              <span class="vol-seg" data-seg="2"><span class="vol-bar"></span><span class="vol-bar"></span><span class="vol-bar"></span><span class="vol-bar"></span></span>
+              <span class="vol-seg" data-seg="1"><span class="vol-bar"></span><span class="vol-bar"></span><span class="vol-bar"></span><span class="vol-bar"></span></span>
+            </div>
+            <div class="lcd-icon-solo lcd-label-row1" id="lcdFxIcon" aria-hidden="true"></div>
+            <div class="lcd-screen-label lcd-label-w2 lcd-label-colC lcd-label-row2" id="lcdTimeLabel">TIME</div>
+            <div class="lcd-screen-label lcd-label-w2 lcd-label-colC lcd-label-row3" id="lcdPumpLabel">PUMP</div>
+            <div class="lcd-screen-label lcd-label-w2 lcd-label-colC lcd-label-row4" id="lcdOutLabel"><span class="lcd-label-icon lcd-label-icon-slim" id="lcdOutIcon"></span><span>OUT</span></div>
+          </div>
+          <div class="lcd-num" id="lcdNum"></div>
+          <div class="lcd-main" id="lcdMain">READY</div>
+        </div>
+      </div>
+
+      <div class="control-deck">
+
+      <div class="top-controls-row">
+        <div class="knob-unit" data-param="vol" data-min="0" data-max="100" data-value="80"
+             tabindex="0" role="slider" aria-label="Master volume" aria-valuemin="0" aria-valuemax="100" aria-valuenow="80">
+          <div class="knob-body"><div class="knob-pointer"></div></div>
+          <div class="knob-label">VOL</div>
+        </div>
+
+        <button class="fn-btn fn-pad two-tier" id="btnRec" aria-pressed="false" aria-label="Record loop into the selected slot, shift for erase">
+          <span class="fn-glow"></span>
+          <span class="chip chip-top">REC</span>
+          <span class="chip chip-bottom">ERASE</span>
+        </button>
+        <button class="fn-btn fn-pad" id="btnPlay" aria-pressed="false" aria-label="Play loop">
+          <span class="fn-glow"></span>
+          <span class="fn-primary">PLAY</span>
+        </button>
+
+        <div class="knob-unit" data-param="tempo"
+             data-min="60" data-max="200" data-value="128"
+             data-secondary-min="0" data-secondary-max="100" data-secondary-value="30" data-secondary-label="SWING"
+             tabindex="0" role="slider" aria-label="Tempo, shift for swing" aria-valuemin="60" aria-valuemax="200" aria-valuenow="128">
+          <div class="knob-body"><div class="knob-pointer"></div></div>
+          <div class="knob-label">TEMPO</div>
+          <div class="knob-label-secondary"><span>SWING</span></div>
+        </div>
+
+        <div class="knob-unit" data-param="filter"
+             data-min="0" data-max="100" data-value="50"
+             data-secondary-min="0" data-secondary-max="100" data-secondary-value="0" data-secondary-label="DELAY"
+             tabindex="0" role="slider" aria-label="Filter sweep, shift for tempo-synced delay" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+          <div class="knob-body"><div class="knob-pointer"></div></div>
+          <div class="knob-label">FILTER</div>
+          <div class="knob-label-secondary"><span>DELAY</span></div>
+        </div>
+      </div>
+
+      <div class="deck-main">
+
+        <div class="side-col-left">
+          <div class="knob-unit" data-param="pump"
+               data-min="0" data-max="100" data-value="55"
+               data-secondary-min="0" data-secondary-max="100" data-secondary-value="0" data-secondary-label="CRUSH"
+               tabindex="0" role="slider" aria-label="Sidechain pump depth, shift for bitcrush drive" aria-valuemin="0" aria-valuemax="100" aria-valuenow="55">
+            <div class="knob-body"><div class="knob-pointer"></div></div>
+            <div class="knob-label">PUMP</div>
+            <div class="knob-label-secondary"><span>CRUSH</span></div>
+          </div>
+
+          <div class="fader-unit" data-param="room" data-min="0" data-max="100" data-value="22"
+               tabindex="0" role="slider" aria-label="Room reverb" aria-valuemin="0" aria-valuemax="100" aria-valuenow="22">
+            <div class="fader-track"><div class="fader-puck"></div></div>
+            <div class="fader-label">ROOM</div>
+          </div>
+
+          <button class="fn-btn fn-pad fn-half" id="btnShift" aria-pressed="false" aria-label="Shift layer">
+            <span class="fn-glow"></span>
+            <span class="fn-primary">SHIFT</span>
+          </button>
+        </div>
+
+        <div class="pad-grid" id="padGrid"></div>
+
+        <button class="fn-btn fn-pad slot-btn" data-slot="A" aria-pressed="false" aria-label="Loop slot A">
+          <span class="slot-glow"></span><span class="slot-label">A</span>
+        </button>
+        <button class="fn-btn fn-pad slot-btn" data-slot="B" aria-pressed="false" aria-label="Loop slot B">
+          <span class="slot-glow"></span><span class="slot-label">B</span>
+        </button>
+        <button class="fn-btn fn-pad slot-btn" data-slot="C" aria-pressed="false" aria-label="Loop slot C">
+          <span class="slot-glow"></span><span class="slot-label">C</span>
+        </button>
+        <button class="fn-btn fn-pad slot-btn" data-slot="D" aria-pressed="false" aria-label="Loop slot D">
+          <span class="slot-glow"></span><span class="slot-label">D</span>
+        </button>
+
+        <button class="fn-btn fn-pad" id="btnOutput" aria-label="Render loops A, B, C and D to an MP3 file">
+          <span class="fn-glow"></span>
+          <span class="fn-primary">OUT</span>
+        </button>
+
+        <button class="fn-btn fn-pad two-tier fx-on" id="btnMetro" aria-pressed="false" aria-label="Tap to toggle the metronome — TEMPO controls its own tempo while it's on. Hold shift and tap to toggle FX">
+          <span class="fn-glow"></span>
+          <span class="chip chip-top">METRO</span>
+          <span class="chip chip-bottom">FX</span>
+        </button>
+
+        <button class="fn-btn fn-pad two-tier" id="btnRepeat" aria-pressed="false" aria-label="Hold to stutter-repeat the last sound, or hold the backtick key. Hold shift and tap to latch the repeat on or off">
+          <span class="fn-glow"></span>
+          <span class="chip chip-top">RPT</span>
+          <span class="chip chip-bottom">LATCH</span>
+        </button>
+
+        <button class="fn-btn fn-pad two-tier" id="btnTime" aria-pressed="false" aria-label="Tap to toggle live quantize, hold shift and tap to correct the timing of the selected loop">
+          <span class="fn-glow"></span>
+          <span class="chip chip-top">TIME</span>
+          <span class="chip chip-bottom">CORR</span>
+        </button>
+
+      </div>
+
+      </div>
+
+    </div>
+  </main>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,1431 @@
+:root{
+  --bg-0:#08080a;
+  --panel:#0c0c0e;
+  --panel-2:#101012;
+  --line:#000;
+  --chrome-hi:#d9b571;
+  --chrome-mid:#a3814f;
+  --chrome-lo:#5c4423;
+  --red:#7c0f16;
+  --red-hi:#c81c26;
+  --red-glow:#7a1810;
+  --text:#e9e9ec;
+  --text-dim:#8a8a90;
+  --pad-face:#1a1b1e;
+  --pad-face-2:#101114;
+  --pad-size:clamp(46px, 6.16vh, 64px);
+  --pad-gap:calc(var(--pad-size) / 2);
+  /* LCD icon-grid's own unit — deliberately NOT a fixed ratio of
+     --pad-size, solved instead from the screen's own total height
+     (3.3*pad-size — bumped up again from 2.9 to grow the square
+     itself, on top of the row-gap ratio shrinking from 0.5 to 0.3) so
+     the grid still hits: 1.5 squares to the top rim, 1.5 to the
+     bottom rim, and a 0.3-square gap between rows. Solving
+       1.5S + 4S(rows) + 3(0.3S)(row gaps) + 1.5S = 3.3 * pad-size
+       7.9S = 3.3 * pad-size  ->  S = 3.3/7.9 * pad-size
+     gives the square. Flex-centering on .lcd-body then splits the
+     leftover space evenly above/below the grid's own box, so a grid
+     content-height of 4.9S (4 squares + 3 0.3-square gaps) yields
+     exactly 1.5S on each rim with no separate margin rule needed. */
+  --icon-sq:calc(var(--pad-size) * 3.3 / 7.9);
+  --icon-gap:calc(var(--icon-sq) * 0.3);
+  /* One gap past CORRECT's right edge (colB2 + CORRECT's own width,
+     which must match #lcdCorrectLabel's width rule exactly below —
+     both are the standard w2 width times the same 1.45 safety
+     multiplier). SHIFT (row4) sits safely below the digit readout's
+     row, so it can use this tight value directly. */
+  --col-b3-correct:calc(var(--icon-sq) * 4 + var(--icon-gap) * 5 + (var(--icon-sq) * 2 + var(--icon-gap)) * 1.45 + var(--icon-gap));
+  /* SHIELD/METRO/SWING (rows 1-3) additionally have to clear the digit
+     readout (#lcdNum), which is centered on the screen independent of
+     the icon grid and sized off --pad-size, not --icon-sq — now that
+     the grid itself is narrower, its own right edge sits further from
+     the (unmoved) digit than before, so the CORRECT-derived offset
+     alone isn't always enough there. The max() falls back to a
+     measured pad-size floor whenever that's the binding constraint.
+     Set to 4.44 so the resulting gap from the digit's right edge to
+     the shield matches the gap on the digit's other side (its left
+     edge to RPT/PLAY, which uses --col-a2's own natural/unstretched
+     formula) — i.e. the digit reads centered in its own breathing
+     room rather than the two sides being independently tuned. */
+  --col-b3:max(var(--col-b3-correct), calc(var(--pad-size) * 4.44));
+  /* Shared two-square label width — was inlined everywhere below;
+     pulled into its own property so the row1/row4 layout formulas
+     further down (which lean on it heavily) read cleanly. */
+  --w2:calc(var(--icon-sq) * 2 + var(--icon-gap));
+  --correct-w:calc(var(--w2) * 1.45);
+  /* Row1 opens with the CRUSH/LATCH/FX icon trio, then FILTER/DELAY,
+     then SWING — three squares + two internal gaps before FILTER. */
+  --row1-icons-w:calc(var(--icon-sq) * 3 + var(--icon-gap) * 2);
+  --row1-filter-left:calc(var(--icon-gap) * 2 + var(--row1-icons-w));
+  /* FILTER-DELAY, DELAY-SWING and SWING-shield are solved as three
+     equal gaps (same idea as row4's equal-gap solve below) — SHIELD's
+     left edge is fixed at --col-b3 regardless of this row's content,
+     so working backward from there through SWING's one square and
+     FILTER/DELAY's two w2 boxes gives three unknown gaps that all
+     resolve to the same value together. */
+  --row1-gap:calc((var(--col-b3) - var(--row1-filter-left) - var(--w2) * 2 - var(--icon-sq)) / 3);
+  --row1-delay-left:calc(var(--row1-filter-left) + var(--w2) + var(--row1-gap));
+  --row1-swing-left:calc(var(--row1-delay-left) + var(--w2) + var(--row1-gap));
+  /* Row4's TEMPO/ERASE/CORRECT/SHIFT share one gap value, solved the
+     same way: SHIFT's own left edge is fixed at --col-b3 (digit
+     clearance, independent of this row's content), so working
+     backward from there — TEMPO's box, a gap, ERASE's box, a gap,
+     CORRECT's (wider) box, a gap, then SHIFT — gives three unknown
+     gaps that all resolve to the same value when solved together,
+     rather than the standard icon-gap everywhere except one oversized
+     gap before the shield. */
+  --row4-gap:calc((var(--col-b3) - var(--icon-gap) - var(--w2) * 2 - var(--correct-w)) / 3);
+  --row4-erase-left:calc(var(--icon-gap) + var(--w2) + var(--row4-gap));
+  --row4-correct-left:calc(var(--row4-erase-left) + var(--w2) + var(--row4-gap));
+  /* SHIFT is centered under the shield's own horizontal center instead
+     of sharing its left edge — half the (shield-w minus shift-w)
+     leftover, since the shield is now wider than the badge. */
+  --shift-center-offset:calc((var(--shield-w) - var(--shift-w)) / 2);
+  /* Vol-meter and colC (TIME/PUMP/OUT) both derive their position from
+     this chain now — the shield's right edge, then a gap, then the
+     meter, then another gap, then colC — instead of colC being
+     independently right-anchored to the screen's own edge while the
+     meter squeezes in from the left. Two independently-anchored
+     chains that both have to land in the same leftover space is
+     exactly what kept drifting out of sync as the square's size
+     changed; one continuous chain can't. The gap itself is
+     deliberately wider than the standard icon-gap (2x) — this one's a
+     breathing space between a whole control group and the meter, not
+     two adjacent same-row icons, so it reads better with more room.
+     Chains off --shield-w alone now: with SHIFT centered under it
+     (see --shift-center-offset) and SWING moved into row1 (ending
+     exactly at the shield, not past it), the shield is always the
+     widest of the group's rows at every breakpoint, so nothing else
+     needs to factor in here. */
+  --vol-left:calc(var(--col-b3) + var(--shield-w) + var(--icon-gap) * 2);
+  --vol-right:calc(var(--vol-left) + var(--icon-sq) * 1.2);
+  /* Shield's own width/height — grown from a 2-square block to a
+     3-square one now that METRO/SWING have moved off row 3 (up to sit
+     above TIME instead), freeing that row for the shield to expand
+     into. Height derivation is the same "reach from one row's bottom
+     to another row's top" logic as before: 3 squares + 2 internal row
+     gaps. Kept perfectly square since it's a circular medallion.
+     --shield-bottom is the matching vertical anchor (row3's bottom, so
+     the block spans rows 1-3) — kept as its own property since the
+     mobile override below has to change both together (a narrower
+     shield there needs to go back to resting on row2's bottom, not
+     row3's, or it'd float short of the top rim). */
+  --shield-w:calc(var(--icon-sq) * 3 + var(--icon-gap) * 2);
+  --shield-bottom:calc(var(--icon-sq) + var(--icon-gap));
+  /* RPT/PLAY's column — one square plus the standard icon-gap past
+     ROOM's own right edge (icon-gap + icon-sq), so the ROOM->RPT gap
+     matches every other icon-to-icon gap on the screen instead of
+     being stretched wider to chase symmetry around the digit
+     readout — that traded consistent icon spacing for a marginal gain
+     in left/right balance around the number, which reads worse. */
+  --col-a2:min(calc(var(--icon-sq) + var(--icon-gap) * 2), calc(var(--pad-size) * 10));
+  /* SHIFT's badge width, fixed (not auto) so its position is fully
+     calc()-able — matches the shield icon's own width exactly (2
+     squares + 1 gap, no extra multiplier) so the two read as the same
+     width in the column, rather than tracking CORRECT's wider box. */
+  --shift-w:calc(var(--icon-sq) * 2 + var(--icon-gap));
+  /* Label font-size now tracks --icon-sq directly instead of an
+     independent vh-clamp — the two used to move roughly together by
+     coincidence (both vh-based clamps with similar breakpoints), but
+     now that the square is deliberately much smaller than pad-size,
+     text needs to shrink with it or it overflows the (now much
+     narrower) 2-square label boxes. 0.8 is tuned with margin above
+     the tightest word (TEMPO) at the standard w2 box width. */
+  --lcd-font:calc(var(--icon-sq) * 0.66);
+}
+
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+html,body{
+  height:100%;
+  margin:0;
+  background:var(--bg-0);
+  color:var(--text);
+  font-family:'JetBrains Mono', monospace;
+  overflow:hidden;
+}
+
+body{
+  background: url("assets/bg.jpg") center / cover no-repeat;
+}
+
+.page{
+  position:relative;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:16px;
+  padding:clamp(10px, 2vh, 24px) 16px;
+  overflow:hidden;
+}
+
+/* ============================================================
+   instrument shell — chrome bezel
+   ============================================================ */
+
+.instrument{
+  position:relative;
+  width:min(max-content, 92vw);
+  max-height:calc(100vh - 20px);
+  z-index:1;
+}
+
+
+/* ============================================================
+   inner black face
+   ============================================================ */
+
+.chassis-face{
+  position:relative;
+  background:
+    radial-gradient(120% 140% at 15% 0%, #1e1e21 0%, #131315 45%, #0e0e10 100%);
+  border-radius:6px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.05),
+    inset 0 0 0 1px rgba(0,0,0,0.8),
+    inset 0 20px 40px rgba(0,0,0,0.5),
+    0 30px 60px rgba(0,0,0,0.65),
+    0 4px 10px rgba(0,0,0,0.5);
+  padding:clamp(9px, 1.32vh, 15px) calc(var(--pad-size) / 2) var(--pad-size);
+  display:flex;
+  flex-direction:column;
+  gap:clamp(7px, 1.1vh, 11px);
+  z-index:2;
+  overflow:hidden;
+}
+
+@keyframes ledPulse{
+  0%,100%{ box-shadow:0 0 10px 2px rgba(188,46,30,0.75); }
+  50%{ box-shadow:0 0 16px 5px rgba(188,46,30,1); }
+}
+
+/* ---------- header: brand + speaker grille ---------- */
+
+.header-row{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  /* height absorbs the chassis-face flex gap that normally sits between
+     header-row and the LCD, then margin-bottom cancels that same gap —
+     net effect: this row's own bottom edge lands exactly on the LCD's
+     top edge, so anything sized to 100% of this row (the grille) lines
+     up with the LCD with no separate bleed math needed */
+  height:calc(2.5 * var(--pad-size) + clamp(7px, 1.1vh, 11px));
+  margin-bottom:calc(-1 * clamp(7px, 1.1vh, 11px));
+  flex-shrink:0;
+}
+
+.brand-block{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.brand-top{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.crest{
+  width:clamp(35px, 5.5vh, 53px);
+  height:clamp(35px, 5.5vh, 53px);
+  flex-shrink:0;
+  filter:drop-shadow(0 2px 3px rgba(0,0,0,0.6));
+}
+
+.wordmark{
+  margin:0;
+  font-family:'UnifrakturMaguntia', cursive;
+  font-size:clamp(22px, 3.96vh, 35px);
+  line-height:1;
+  letter-spacing:1px;
+  background:linear-gradient(180deg, #f2e0b8 0%, #d9b571 30%, #a3814f 55%, #c9a468 75%, #5c4423 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  filter:drop-shadow(0 1px 0 #000);
+}
+
+.brand-tagline{
+  font-family:'Eagle Lake', cursive;
+  font-size:8.5px;
+  letter-spacing:2px;
+  color:var(--chrome-mid);
+  /* pinned to the header's top-left corner, out of flow so it can't
+     affect the header row's own shape/height */
+  position:absolute;
+  top:3px;
+  left:3px;
+}
+
+.speaker-grille{
+  width:auto;
+  /* header-row's own height now already reaches exactly to the LCD
+     (see .header-row) — so the grille only needs to bleed upward
+     through the chassis's top padding to touch the outer edge; its
+     bottom then lands precisely on the LCD with no separate match */
+  height:calc(100% + clamp(9px, 1.32vh, 15px) + 2px);
+  aspect-ratio:1 / 1;
+  flex-shrink:0;
+  margin-top:calc(-1 * clamp(9px, 1.32vh, 15px) - 2px);
+  margin-right:calc(-1 * var(--pad-size) / 2 - 2px);
+  border-radius:0 6px 0 0;
+  background:
+    repeating-linear-gradient(45deg, rgba(255,235,190,0.35) 0px, rgba(255,235,190,0.35) 1.5px, transparent 1.5px, transparent 3.5px),
+    repeating-linear-gradient(-45deg, rgba(0,0,0,0.3) 0px, rgba(0,0,0,0.3) 1.5px, transparent 1.5px, transparent 3.5px),
+    linear-gradient(160deg, #d9b571 0%, #a3814f 50%, #6b4f28 100%);
+  border:1px solid #000;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.15),
+    0 1px 2px rgba(0,0,0,0.4);
+}
+
+/* ---------- lcd screen ---------- */
+
+.lcd{
+  margin-left:calc(-1 * var(--pad-size) / 2);
+  margin-right:calc(-1 * var(--pad-size) / 2);
+  border-radius:0;
+  height:calc(3.3 * var(--pad-size));
+  flex-shrink:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding-left:calc(var(--pad-size) / 2 + 10px);
+  padding-right:calc(var(--pad-size) / 2 + 10px);
+  background:linear-gradient(165deg, #1a1a1c 0%, #101012 60%, #08080a 100%);
+  border-top:1px solid #000;
+  border-bottom:1px solid #000;
+  box-shadow:inset 0 2px 4px rgba(0,0,0,0.6), inset 0 0 14px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.04);
+}
+
+/* body row — icon strip only for now. STANDBY/LIVE status and the digit
+   readout are hidden (not removed: script.js still updates their text/
+   classes under the hood, so they're one CSS tweak away from coming back
+   if a later layout wants them). */
+.lcd-body{
+  position:relative;
+  display:flex;
+  align-items:center;
+  width:100%;
+}
+
+.lcd-icon-grid{
+  position:relative;
+  display:grid;
+  /* Cell + gap use --icon-sq/--icon-gap (see :root) instead of
+     --pad-size directly now. Explicit height as a safety net so the
+     1.5-square rim margins land exactly as intended regardless of
+     how the grid's implicit row-sizing resolves with every child
+     pulled out via position:absolute. One single gap ratio (0.5*cell,
+     up from 0.2 — the whole point of this pass was more breathing
+     room) is still used everywhere: icon-to-icon, icon-to-edge, and
+     label-to-label all share it. */
+  grid-template-columns:repeat(4, var(--icon-sq));
+  grid-auto-rows:var(--icon-sq);
+  gap:var(--icon-gap);
+  height:calc(var(--icon-sq) * 4 + var(--icon-gap) * 3);
+}
+
+/* on-screen parameter words (TEMPO, FILTER, DELAY, TIME, PUMP, ERASE) —
+   printed right on the LCD instead of living on their physical
+   knobs/buttons. Same dim-white / red-glow language as the icons and
+   the digit readout — this is screen content, not chassis hardware,
+   so it stays in that family rather than the knobs' bronze.
+
+   Layout: two columns (colA, colB) sit immediately right of the icon
+   grid, one per row, sized to the grid's own cell+gap units so they
+   line up with it exactly — colA/colB labels are children of
+   #lcdIconGrid and taken out of its grid (position:absolute) so they
+   don't disturb the 16-icon auto-placement. The centered digit
+   readout blocks colA/colB on the two middle rows, so those two
+   (TIME, PUMP) use a third column, colC, anchored to the right edge
+   of the screen instead — those are children of .lcd-body directly. */
+.lcd-screen-label{
+  position:absolute;
+  bottom:0;
+  width:calc(var(--icon-sq) * 2 + var(--icon-gap));
+  height:var(--icon-sq);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:'Pirata One', cursive;
+  font-size:var(--lcd-font);
+  letter-spacing:0.2px;
+  color:rgba(255,255,255,0.22);
+  white-space:nowrap;
+  user-select:none;
+  gap:calc(var(--pad-size) * 0.08);
+  filter:drop-shadow(0 0 0px rgba(200,28,38,0));
+  transition:color 0.22s ease, filter 0.22s ease;
+}
+.lcd-screen-label.lit{
+  color:#c81c26;
+  filter:drop-shadow(0 0 4px #c81c26);
+}
+
+.lcd-label-colA{ left:calc(100% + var(--icon-gap)); }
+/* colC is now a child of #lcdIconGrid too (like the vol-meter, SHIFT,
+   etc.) and chained off --vol-right + a gap, rather than independently
+   right-anchored to the screen's own edge — see --vol-left/--vol-right
+   in :root for why two independently-anchored chains kept drifting
+   out of sync as the square's size changed. */
+.lcd-label-colC{ position:absolute; left:calc(100% + var(--vol-right) + var(--icon-gap)); }
+/* Second icon slot packed into colA's own row footprint (colB's rows
+   2-3 sit directly under the digit readout and can't be used — the
+   readout is wider than colB's whole column, at any row height). */
+.lcd-label-colA2{ left:calc(100% + var(--col-a2)); }
+/* Row1: CRUSH/LATCH/FX icon trio, then FILTER/DELAY, then SWING —
+   see --row1-icons-w/--row1-filter-left/--row1-delay-left/
+   --row1-swing-left in :root for how each position is derived (an
+   equal three-way gap split from FILTER through SWING to the
+   shield). FILTER/DELAY/SWING get their own ID rules since they no
+   longer share a plain column formula with anything else. */
+#lcdCrushIcon{ left:calc(100% + var(--icon-gap)); }
+#lcdLatchIcon{ left:calc(100% + var(--icon-gap) * 2 + var(--icon-sq)); }
+#lcdFxIcon{ left:calc(100% + var(--icon-gap) * 3 + var(--icon-sq) * 2); }
+#lcdFilterLabel{ left:calc(100% + var(--row1-filter-left)); }
+#lcdDelayLabel{ left:calc(100% + var(--row1-delay-left)); }
+/* Row4: TEMPO stays put (shares colA with REC/ROOM), but ERASE and
+   CORRECT now use --row4-erase-left/--row4-correct-left (see :root)
+   instead of the old fixed colB/colB2 offsets, so TEMPO-ERASE,
+   ERASE-CORRECT and CORRECT-SHIFT all land on the same --row4-gap
+   value rather than two standard gaps and one oversized one before
+   the shield. */
+#lcdEraseLabel{ left:calc(100% + var(--row4-erase-left)); }
+/* CORRECT is the longest word on the screen — rather than shrinking
+   its font to fit the standard 2-square box (which made it look
+   inconsistent with TEMPO/ERASE/DELAY), it gets a wider box instead
+   so it can use the exact same font size as everything else. */
+#lcdCorrectLabel{
+  left:calc(100% + var(--row4-correct-left));
+  width:var(--correct-w);
+  font-size:var(--lcd-font);
+  letter-spacing:0.2px;
+}
+/* METRO's icon sits above TIME (row1, where FX used to be before it
+   moved next to LATCH), centered over TIME's own w2 box rather than
+   sharing its left edge — colC's left offset + half of TIME's own w2
+   width, minus half METRO's one-square width, lands its box centered.
+   METRO's glyph (a triangle) has symmetric left/right margins inside
+   its square, so a centered box already puts the visible glyph
+   dead-center too — no separate visual compensation needed here. */
+#lcdMetroIcon{ left:calc(100% + var(--vol-right) + var(--icon-gap) * 1.5 + var(--icon-sq) * 0.5); }
+/* SWING now sits to the right of DELAY (row1) instead of next to
+   SHIFT — see --row1-swing-left in :root (part of the same three-way
+   equal-gap solve as FILTER-DELAY and DELAY-SWING). */
+#lcdSwingLabel{ left:calc(100% + var(--row1-swing-left)); }
+
+/* SHIFT — a filled badge, sized to just wrap the word rather than the
+   full two-square slot. The word itself is ALWAYS a hollow cutout in
+   the LCD's own background tone — only the fill color changes: dim
+   grey at idle, solid signal-red for as long as SHIFT is held (not a
+   timed flash, since this is a hold interaction). */
+.lcd-shift-square{
+  width:var(--shift-w);
+  height:calc(var(--icon-sq) * 0.68);
+  padding:0 calc(var(--icon-gap) * 0.9);
+  border-radius:3px;
+  background:rgba(255,255,255,0.22);
+  color:#0c0c0e;
+  box-shadow:none;
+  filter:none;
+  font-size:var(--lcd-font);
+  transition:background 0.18s ease, box-shadow 0.18s ease;
+}
+/* SHIFT centers under the shield's own horizontal center now (see
+   --shift-center-offset in :root) instead of sharing its left edge —
+   shield is wider than SHIFT's own text-hugging badge (--shift-w), so
+   this reads as one aligned, balanced group rather than the two just
+   sharing a left edge. It also gets its own bottom offset, since its
+   badge is shorter than the other row4 words' own box — sharing their
+   plain bottom:0 would leave its center sitting lower than
+   ERASE/TEMPO/CORRECT's. ID selector so both rules win over
+   .lcd-label-row4's bottom:0 regardless of source order. */
+#lcdShiftLabel{
+  left:calc(100% + var(--col-b3) + var(--shift-center-offset));
+  bottom:calc(var(--icon-sq) * 0.16);
+}
+.lcd-shift-square.lit{
+  background:#c81c26;
+  color:#0c0c0e;
+  filter:none;
+  box-shadow:0 0 6px rgba(200,28,38,0.85);
+}
+
+.lcd-label-row1{ bottom:calc((var(--icon-sq) + var(--icon-gap)) * 3); }
+.lcd-label-row2{ bottom:calc((var(--icon-sq) + var(--icon-gap)) * 2); }
+.lcd-label-row3{ bottom:calc(var(--icon-sq) + var(--icon-gap)); }
+.lcd-label-row4{ bottom:0; }
+
+.lcd-label-icon{
+  display:block;
+  width:calc(var(--icon-sq) * 0.64);
+  height:calc(var(--icon-sq) * 0.64);
+  color:inherit;
+  flex:none;
+}
+.lcd-label-icon svg{ width:100%; height:100%; display:block; }
+
+/* OUT's scroll glyph sits beside the word "OUT" (rather than alone),
+   so it gets its own slimmer footprint instead of the square SWING
+   sizing — narrow enough that icon + gap + letters fit inside the
+   same 2-square label width as every other row. */
+.lcd-label-icon-slim{
+  width:calc(var(--icon-sq) * 0.4);
+}
+
+/* Solo icon glyph (no word) — for ROOM/CRUSH, sitting in the
+   otherwise-empty row1/row4 slots of the colC column, same dim/lit
+   treatment as the pad icon grid. */
+.lcd-icon-solo{
+  position:absolute;
+  right:var(--icon-gap);
+  width:var(--icon-sq);
+  height:var(--icon-sq);
+  color:rgba(255,255,255,0.22);
+  filter:drop-shadow(0 0 0px rgba(200,28,38,0));
+  transition:color 0.22s ease, filter 0.22s ease;
+}
+.lcd-icon-solo svg{ width:100%; height:100%; display:block; }
+.lcd-icon-solo.lit{
+  color:#c81c26;
+  filter:drop-shadow(0 0 4px #c81c26);
+}
+
+
+/* ABCD shield glyph — same dim-grey-idle / signal-red-lit language as
+   every other LCD icon, no separate material. Sized to a 3x3-square
+   block (--shield-w — grown now that METRO/SWING moved off row 3, see
+   :root) so it reads at a bigger scale than the single-cell icons.
+   Positioned past the digit readout's right edge — colB3's x-offset,
+   spanning row1 down through row3 — so the taller footprint doesn't
+   run into the digit's blocked mid-rows. Both the ring and the disc
+   are split into four quadrant wedges (matching the four rays), so a
+   whole quadrant — border segment + disc segment + rays — glows
+   together as one piece to show which track is chosen. */
+.lcd-shield-icon{
+  position:absolute;
+  left:calc(100% + var(--col-b3));
+  bottom:var(--shield-bottom);
+  width:var(--shield-w);
+  height:var(--shield-w);
+  filter:none;
+}
+.lcd-shield-icon svg{ display:block; width:100%; height:100%; }
+.lcd-shield-icon .shield-quadrant path{
+  fill:rgba(255,255,255,0.22);
+  transition:fill 0.25s ease, filter 0.25s ease;
+  filter:drop-shadow(0 0 0px rgba(200,28,38,0));
+}
+/* Each quadrant is its own loop slot (A/B/C/D, same lettering as the
+   slot-btn pads below) and now gets its own signal color instead of
+   one uniform red, so the shield doubles as a tell for which slot(s)
+   are active: A bronze, B bone white, C sapphire blue, D bone white
+   again (same tone as B, reused deliberately). */
+.lcd-shield-icon .shield-quadrant[data-slot="A"].lit path{
+  fill:#b08d57;
+  filter:drop-shadow(0 0 5px #b08d57) drop-shadow(0 0 10px rgba(176,141,87,0.85));
+}
+.lcd-shield-icon .shield-quadrant[data-slot="B"].lit path{
+  fill:#f0ece0;
+  filter:drop-shadow(0 0 5px #f0ece0) drop-shadow(0 0 10px rgba(240,236,224,0.85));
+}
+.lcd-shield-icon .shield-quadrant[data-slot="C"].lit path{
+  fill:#2f6fdb;
+  filter:drop-shadow(0 0 5px #2f6fdb) drop-shadow(0 0 10px rgba(47,111,219,0.85));
+}
+.lcd-shield-icon .shield-quadrant[data-slot="D"].lit path{
+  fill:#f0ece0;
+  filter:drop-shadow(0 0 5px #f0ece0) drop-shadow(0 0 10px rgba(240,236,224,0.85));
+}
+
+.lcd-icon{
+  width:100%;
+  height:100%;
+  color:rgba(255,255,255,0.22);
+  /* base filter is a zero-strength drop-shadow of the same function type as
+     the lit state below — browsers can't interpolate "none" -> "drop-shadow(...)",
+     that jumps instantly. Sharing the function lets the glow fade smoothly in
+     and out instead of popping on. No transform/scale anywhere here on purpose:
+     the icon itself never changes size, only its color/glow. */
+  filter:drop-shadow(0 0 0px rgba(200,28,38,0));
+  transition:color 0.22s ease, filter 0.22s ease;
+}
+.lcd-icon svg{
+  width:100%;
+  height:100%;
+  display:block;
+}
+.lcd-icon.lit{
+  color:#c81c26;
+  filter:drop-shadow(0 0 4px #c81c26);
+}
+
+/* number readout — real seven-segment digits, like an old digital
+   watch/calculator LCD: every segment is always drawn, the ones not
+   part of the current digit just sit at low opacity ("off") so the
+   ghost of the full glyph is always visible, and the active segments
+   glow bright red ("on"). Centered on the screen, independent of the
+   icon grid's flex flow. */
+.lcd-num{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%, -50%);
+  display:flex;
+  align-items:center;
+  user-select:none;
+  pointer-events:none;
+}
+.lcd-num .seg-digit{
+  height:calc(var(--pad-size) * 1.0);
+  width:auto;
+  display:block;
+}
+.lcd-num .seg-dot{
+  height:calc(var(--pad-size) * 1.0);
+  width:calc(var(--pad-size) * 0.22);
+  display:block;
+}
+.lcd-num .seg-on{
+  fill:#c81c26;
+  filter:drop-shadow(0 0 4px #c81c26);
+}
+.lcd-num .seg-off{
+  fill:rgba(255,255,255,0.22);
+}
+
+.lcd-top{
+  display:none;
+}
+
+.lcd-led{
+  width:5.5px;
+  height:5.5px;
+  border-radius:50%;
+  background:#3a0006;
+  box-shadow:inset 0 0 1px rgba(0,0,0,0.8);
+}
+.lcd-led.on{
+  background:#ffdcdd;
+  animation:ledPulse 2.4s ease-in-out infinite;
+}
+
+.lcd-state{ font-weight:700; }
+
+.lcd-main{
+  display:none;
+  font-family:'JetBrains Mono', monospace;
+  font-weight:800;
+  font-size:clamp(20px, 3.3vh, 33px);
+  letter-spacing:4px;
+  text-align:center;
+  color:#ffecec;
+  text-shadow:0 0 10px rgba(255,60,70,0.55);
+  padding:2px 0;
+}
+
+/* ---------- control deck: pads + fn buttons + knobs ---------- */
+
+.control-deck{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  /* same half-square gap as every other row interval, so the top row
+     (REC/PLAY) sits exactly as far from the pad grid as every other row
+     is from its neighbor */
+  gap:var(--pad-gap);
+  width:100%;
+  margin:0 auto;
+  /* chassis-face's own gap between the LCD and control-deck is smaller
+     than a half-square (it also separates header-row/LCD) — top this up
+     so LCD-to-top-row is exactly half a pad-square too */
+  margin-top:calc(var(--pad-gap) - clamp(7px, 1.1vh, 11px));
+}
+
+/* deck-main and top-controls-row share the same 6-column grid
+   (side | pad1 | pad2 | pad3 | pad4 | side) so controls in the top
+   row line up exactly with what's beneath them. */
+
+.deck-main{
+  display:grid;
+  grid-template-columns: repeat(7, var(--pad-size));
+  grid-template-rows: repeat(4, var(--pad-size));
+  gap:var(--pad-gap);
+  align-items:start;
+  justify-content:center;
+}
+
+/* left column (PUMP, ROOM, SHIFT) and slot column A–D sit either
+   side of the pad grid; TEMPO+FX get their own column to its right.
+   side-col-left is its own 4-row grid using the same row lines as
+   deck-main, so SHIFT (row 4) lines up exactly with slot D / row 4. */
+.side-col-left{
+  grid-column:1;
+  grid-row:1 / 5;
+  display:grid;
+  grid-template-rows:repeat(4, var(--pad-size));
+  gap:var(--pad-gap);
+}
+.side-col-left [data-param="pump"]{ grid-row:1; }
+.side-col-left .fader-unit{ grid-row:2 / 4; }
+.side-col-left #btnShift{ grid-row:4; align-self:start; }
+.slot-btn[data-slot="A"]{ grid-column:2; grid-row:1; }
+.slot-btn[data-slot="B"]{ grid-column:2; grid-row:2; }
+.slot-btn[data-slot="C"]{ grid-column:2; grid-row:3; }
+.slot-btn[data-slot="D"]{ grid-column:2; grid-row:4; }
+.pad-grid{ grid-column:3 / 7; grid-row:1 / 5; }
+#btnOutput{ grid-column:7; grid-row:1; }
+#btnMetro{ grid-column:7; grid-row:2; }
+#btnRepeat{ grid-column:7; grid-row:3; }
+#btnTime{ grid-column:7; grid-row:4; }
+
+/* ---------- top row: VOL — REC/PLAY — TEMPO, sitting above the pad grid ---------- */
+
+.top-controls-row{
+  display:grid;
+  grid-template-columns: repeat(7, var(--pad-size));
+  gap:var(--pad-gap);
+  align-items:end;
+  justify-content:center;
+}
+
+.top-controls-row [data-param="tempo"]{ grid-column:6; }
+.top-controls-row [data-param="filter"]{ grid-column:7; }
+
+.fn-btn.fn-pad{
+  width:var(--pad-size);
+  height:var(--pad-size);
+  min-width:0;
+  padding:clamp(4px, 0.77vh, 7px);
+  justify-content:center;
+}
+
+/* SHIFT and FX are flattened to half a square, freeing exactly the
+   height ROOM's two-square fader needs in the same column */
+.fn-btn.fn-pad.fn-half{
+  height:calc(var(--pad-size) / 2);
+  padding:clamp(2px, 0.4vh, 4px);
+}
+
+/* ---------- fader (ROOM): locked to exactly two pad-squares tall ---------- */
+
+.fader-unit{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  height:calc(2 * var(--pad-size) + var(--pad-gap));
+  outline:none;
+  cursor:grab;
+  touch-action:none;
+}
+.fader-unit:active{ cursor:grabbing; }
+.fader-unit:focus-visible .fader-track,
+.fader-unit.holding .fader-track{
+  box-shadow:inset 0 2px 5px rgba(0,0,0,0.75);
+}
+
+.fader-track{
+  position:relative;
+  width:clamp(29px, 3.96vh, 37px);
+  height:calc(100% - 8px);
+  border-radius:2px;
+  background:linear-gradient(180deg, #0d0d0f 0%, #08080a 100%);
+  border:1px solid #000;
+}
+
+.fader-track::before{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:8%;
+  bottom:8%;
+  width:2px;
+  transform:translateX(-50%);
+  background:#ece5d3;
+  border-radius:1px;
+  box-shadow:0 0 3px rgba(236,229,211,0.4);
+}
+
+.fader-puck{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:clamp(22px, 3.08vh, 29px);
+  height:clamp(14px, 1.98vh, 18px);
+  border-radius:3px;
+  background:linear-gradient(160deg, #b03a28 0%, #7a1810 40%, #4a0f0a 72%, #2a0805 100%);
+  border:1px solid #000;
+  transform:translate(-50%, -50%);
+  box-shadow:0 2px 4px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.35);
+  z-index:2;
+}
+
+/* a short oxblood reference line crossing the track at its center height —
+   raised above the track so it actually crosses the marble-white
+   center line instead of hiding behind the track's opaque background */
+.fader-unit::before{
+  content:"";
+  position:absolute;
+  left:12%;
+  right:12%;
+  top:50%;
+  height:1.5px;
+  transform:translateY(-50%);
+  background:#7a1810;
+  z-index:1;
+}
+
+.fader-label{
+  position:absolute;
+  left:50%;
+  bottom:100%;
+  transform:translateX(-50%);
+  margin-bottom:3px;
+  font-family:'Eagle Lake', cursive;
+  font-size:8.5px;
+  letter-spacing:1px;
+  color:var(--chrome-mid);
+  white-space:nowrap;
+  pointer-events:none;
+  z-index:1;
+}
+
+/* ---------- pad grid ---------- */
+
+.pad-grid{
+  display:grid;
+  grid-template-columns:repeat(4, var(--pad-size));
+  grid-template-rows:repeat(4, var(--pad-size));
+  gap:var(--pad-gap);
+}
+
+.pad{
+  position:relative;
+  width:var(--pad-size);
+  height:var(--pad-size);
+  border-radius:2px;
+  background:radial-gradient(circle at 35% 30%, #faf7ef 0%, #ece5d3 45%, #cec5ac 80%, #b0a88f 100%);
+  border:1px solid rgba(0,0,0,0.15);
+  box-shadow:
+    inset 0 -6px 10px rgba(0,0,0,0.18),
+    0 2px 4px rgba(0,0,0,0.4);
+  cursor:pointer;
+  user-select:none;
+  touch-action:manipulation;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:transform 0.04s ease, box-shadow 0.12s ease;
+}
+
+/* pad name lives above the keycap, same treatment as the knob labels;
+   the pad face itself only shows the key that triggers it */
+.pad-name{
+  position:absolute;
+  left:50%;
+  bottom:100%;
+  transform:translateX(-50%);
+  margin-bottom:3px;
+  font-family:'Eagle Lake', cursive;
+  font-size:8.5px;
+  font-weight:400;
+  letter-spacing:0.5px;
+  color:var(--chrome-mid);
+  white-space:nowrap;
+  z-index:1;
+  pointer-events:none;
+}
+
+.pad-key{
+  position:absolute;
+  top:4px;
+  left:4px;
+  font-family:'Eagle Lake', cursive;
+  font-size:13px;
+  font-weight:400;
+  /* lighter bronze — reads against the pad's light marble surface */
+  color:#8a6a3a;
+  opacity:0.85;
+  z-index:1;
+  transition:opacity 0.15s ease;
+}
+
+.pad-glow{
+  position:absolute;
+  inset:0;
+  border-radius:2px;
+  background:radial-gradient(circle at 50% 120%, rgba(188,46,30,0.75), transparent 85%);
+  opacity:0;
+  transition:opacity 0.25s ease;
+  pointer-events:none;
+}
+
+.pad:hover .pad-key{
+  opacity:1;
+}
+
+.pad.active{
+  transform:translateY(1px) scale(0.98);
+  border-color:rgba(188,46,30,0.55);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.1),
+    0 0 0 1px rgba(188,46,30,0.45),
+    0 0 30px rgba(188,46,30,0.6);
+}
+.pad.active .pad-glow{ opacity:1; }
+.pad.active .pad-key{ opacity:1; }
+
+/* ---------- function buttons: SHIFT / REC / PLAY / FX ---------- */
+
+.fn-btn{
+  position:relative;
+  flex:0 0 auto;
+  width:100%;
+  min-width:56px;
+  padding:clamp(5px, 0.9vh, 8px) clamp(9px, 1.4vw, 14px) clamp(4px, 0.8vh, 7px);
+  border-radius:2px;
+  border:1px solid #000;
+  background:#17171a;
+  box-shadow:
+    inset 0 -3px 5px rgba(0,0,0,0.4),
+    0 2px 4px rgba(0,0,0,0.4);
+  cursor:pointer;
+  outline:none;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+  transition:box-shadow 0.12s ease, transform 0.05s ease;
+}
+
+.fn-btn:active{ transform:translateY(1px); }
+
+/* bottom-emanating red bloom, same treatment as the pads and the ABCD
+   slots — this is the only "is this on" cue now, no more LED dot */
+.fn-glow{
+  position:absolute;
+  inset:0;
+  border-radius:2px;
+  background:radial-gradient(circle at 50% 120%, rgba(188,46,30,0.75), transparent 85%);
+  opacity:0;
+  transition:opacity 0.25s ease;
+  pointer-events:none;
+}
+
+/* Eagle Lake — elegant calligraphic blackletter. Same size as the
+   two-tier chip text below so every button label reads consistently */
+.fn-primary{
+  font-family:'Eagle Lake', cursive;
+  font-weight:400;
+  font-size:8.5px;
+  letter-spacing:0.3px;
+  color:var(--chrome-hi);
+}
+
+.fn-secondary{
+  font-family:'Eagle Lake', cursive;
+  font-size:8.5px;
+  letter-spacing:0.5px;
+  color:#b9525a;
+}
+
+.fn-btn.engaged{
+  border-color:rgba(188,46,30,0.5);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.1),
+    0 0 0 1px rgba(188,46,30,0.45),
+    0 0 18px rgba(188,46,30,0.5);
+}
+/* engaged is edge-glow only — the bottom bloom is reserved for momentary
+   hit flashes (pads, slot clicks), not for a control that's steadily on */
+.fn-btn.engaged .fn-primary{ color:#ffdcdd; }
+
+/* a quick bottom-bloom flash on every press, same as pads/slots get —
+   wired up in JS for every fn-btn except REC */
+.fn-btn.flash .fn-glow{ opacity:1; }
+
+/* SHIFT reads as a toggle: raised/off vs flat-pressed/on, not just a glow */
+/* SHIFT — bronze button, raised/off state */
+#btnShift{
+  background:linear-gradient(160deg, #d9b571 0%, #a3814f 50%, #6b4f28 100%);
+}
+#btnShift .fn-primary{ color:#2a1f0f; }
+
+/* OUT — bronze button */
+#btnOutput{
+  background:linear-gradient(160deg, #d9b571 0%, #a3814f 50%, #6b4f28 100%);
+}
+#btnOutput .fn-primary{ color:#2a1f0f; }
+
+#btnShift.engaged{
+  border-color:rgba(188,46,30,0.55);
+  box-shadow:
+    inset 0 -3px 5px rgba(0,0,0,0.4),
+    0 2px 4px rgba(0,0,0,0.4),
+    0 0 0 1px rgba(188,46,30,0.3),
+    0 0 18px rgba(188,46,30,0.5);
+  transform:translateY(1px);
+}
+
+/* ---------- two-tier buttons: primary chip (tap) + a second function
+   printed on its own chip below (shift+tap) — REC/ERASE, RPT/LATCH and
+   TIME/CORRECT all share this shape. The frame is just the regular
+   dark fn-btn background; the chips run edge-to-edge with no gap and
+   only their outer corners are rounded, so the seam between them is a
+   clean flush line instead of leaving tiny corner gaps. The bottom
+   chip is just a print in its own color — every interactive cue
+   (press, glow, flash) is scoped to the top chip alone. */
+.fn-btn.two-tier{
+  align-items:stretch;
+  background:#17171a;
+  padding:0 0 2px;
+  gap:0;
+}
+.two-tier .chip{
+  flex:1;
+  min-height:0;
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:'Eagle Lake', cursive;
+  font-size:8.5px;
+  font-weight:400;
+  letter-spacing:0.2px;
+  white-space:nowrap;
+}
+.two-tier .chip-top{
+  background:#17171a;
+  color:var(--chrome-hi);
+  border:1px solid #000;
+  border-radius:2px 2px 0 0;
+  box-shadow:inset 0 -3px 5px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.4);
+  padding:0 clamp(9px, 1.4vw, 14px);
+}
+.two-tier .chip-bottom{
+  border:1px solid #000;
+  border-radius:0 0 2px 2px;
+  color:var(--chrome-hi);
+  /* it's just a print, not a real button — don't imply it's clickable */
+  cursor:default;
+}
+/* RPT — grape purple, LATCH — marble white print */
+#btnRepeat.two-tier .chip-top{
+  background:linear-gradient(160deg, #5c1f78 0%, #3f1450 55%, #260a30 100%);
+}
+#btnRepeat.two-tier .chip-bottom{
+  background:radial-gradient(circle at 35% 30%, #faf7ef 0%, #ece5d3 45%, #cec5ac 80%, #b0a88f 100%);
+  color:#202124;
+  text-shadow:0 1px 0 rgba(255,255,255,0.3);
+}
+/* TIME/CORR — bronze */
+#btnTime.two-tier .chip-bottom{
+  background:linear-gradient(160deg, #c9a468 0%, #b08d57 50%, #8a6a3a 100%);
+  color:#2a1f0f;
+  text-shadow:0 1px 0 rgba(255,255,255,0.2);
+}
+/* REC/ERASE — REC's chip is oxblood (same family as the LCD glass,
+   just a shade brighter), ERASE is marble white like LATCH */
+#btnRec.two-tier .chip-top{
+  background:linear-gradient(160deg, #8f131a 0%, #5c0d12 55%, #3a080c 100%);
+}
+#btnRec.two-tier .chip-bottom{
+  background:
+    repeating-linear-gradient(115deg, rgba(0,0,0,0.03) 0px, rgba(0,0,0,0.03) 1px, transparent 1px, transparent 3px),
+    linear-gradient(160deg, #f5f1e6 0%, #e8e2d2 50%, #d4cbb5 100%);
+  color:#202124;
+  text-shadow:0 1px 0 rgba(255,255,255,0.3);
+}
+
+/* only the top chip is a real pressable surface — press-down, the
+   steady engaged glow and the hit-flash bloom all stay scoped to it,
+   the bottom chip never moves or lights up */
+.fn-btn.two-tier.engaged,
+.fn-btn.two-tier.flash{
+  border-color:#000;
+  box-shadow:inset 0 -3px 5px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.4);
+}
+.two-tier .fn-glow{ bottom:50%; }
+.fn-btn.two-tier:active{ transform:none; }
+/* :active bubbles up from whichever chip was actually pressed to the
+   whole button, so ".two-tier:active .chip-top" would move chip-top
+   even when the press landed on chip-bottom. Targeting ".chip-top:active"
+   directly only matches when the pointer is down on chip-top itself. */
+.two-tier .chip-top:active{ transform:translateY(1px); }
+.two-tier.engaged .chip-top{
+  border-color:rgba(188,46,30,0.5);
+  box-shadow:
+    inset 0 -3px 5px rgba(0,0,0,0.4),
+    0 2px 4px rgba(0,0,0,0.4),
+    0 0 0 1px rgba(188,46,30,0.45),
+    0 0 18px rgba(188,46,30,0.5);
+}
+.two-tier.flash .chip-top{
+  border-color:rgba(188,46,30,0.55);
+  box-shadow:
+    inset 0 -3px 5px rgba(0,0,0,0.4),
+    0 2px 4px rgba(0,0,0,0.4),
+    0 0 0 1px rgba(188,46,30,0.45),
+    0 0 30px rgba(188,46,30,0.6);
+}
+
+/* ---------- loop slots A/B/C: same fn-btn/fn-pad square as everything else ---------- */
+
+/* big illuminated-manuscript-style initial, filling almost the whole
+   keycap — same blackletter face and silver shine as the L.A.L. wordmark */
+.slot-btn.fn-pad{
+  padding:1px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* ABCD and PLAY — soft black leather: irregular pebbled grain plus a
+   faint sheen highlight over a near-black brown base. Each button gets
+   its own grain-circle positions/spacing so the pebbling doesn't
+   visibly repeat from one key to the next. */
+.slot-btn.fn-pad,
+#btnPlay{
+  background:
+    repeating-radial-gradient(circle at 22% 18%, rgba(255,255,255,0.035) 0px, rgba(255,255,255,0.035) 1px, transparent 1px, transparent 4px),
+    repeating-radial-gradient(circle at 65% 72%, rgba(0,0,0,0.18) 0px, rgba(0,0,0,0.18) 1px, transparent 1px, transparent 5px),
+    radial-gradient(circle at 30% 18%, rgba(255,255,255,0.07), transparent 55%),
+    linear-gradient(160deg, #1e1a17 0%, #14110f 60%, #0c0a09 100%);
+}
+.slot-btn[data-slot="A"]{
+  background:
+    repeating-radial-gradient(circle at 18% 24%, rgba(255,255,255,0.035) 0px, rgba(255,255,255,0.035) 1px, transparent 1px, transparent 4px),
+    repeating-radial-gradient(circle at 72% 62%, rgba(0,0,0,0.18) 0px, rgba(0,0,0,0.18) 1px, transparent 1px, transparent 6px),
+    radial-gradient(circle at 25% 15%, rgba(255,255,255,0.07), transparent 55%),
+    linear-gradient(160deg, #1e1a17 0%, #14110f 60%, #0c0a09 100%);
+}
+.slot-btn[data-slot="B"]{
+  background:
+    repeating-radial-gradient(circle at 32% 68%, rgba(255,255,255,0.035) 0px, rgba(255,255,255,0.035) 1px, transparent 1px, transparent 5px),
+    repeating-radial-gradient(circle at 76% 22%, rgba(0,0,0,0.18) 0px, rgba(0,0,0,0.18) 1px, transparent 1px, transparent 4px),
+    radial-gradient(circle at 68% 20%, rgba(255,255,255,0.07), transparent 55%),
+    linear-gradient(160deg, #1e1a17 0%, #14110f 60%, #0c0a09 100%);
+}
+.slot-btn[data-slot="C"]{
+  background:
+    repeating-radial-gradient(circle at 58% 14%, rgba(255,255,255,0.035) 0px, rgba(255,255,255,0.035) 1px, transparent 1px, transparent 4px),
+    repeating-radial-gradient(circle at 18% 78%, rgba(0,0,0,0.18) 0px, rgba(0,0,0,0.18) 1px, transparent 1px, transparent 5px),
+    radial-gradient(circle at 15% 72%, rgba(255,255,255,0.07), transparent 55%),
+    linear-gradient(160deg, #1e1a17 0%, #14110f 60%, #0c0a09 100%);
+}
+.slot-btn[data-slot="D"]{
+  background:
+    repeating-radial-gradient(circle at 76% 74%, rgba(255,255,255,0.035) 0px, rgba(255,255,255,0.035) 1px, transparent 1px, transparent 6px),
+    repeating-radial-gradient(circle at 26% 28%, rgba(0,0,0,0.18) 0px, rgba(0,0,0,0.18) 1px, transparent 1px, transparent 4px),
+    radial-gradient(circle at 50% 50%, rgba(255,255,255,0.07), transparent 55%),
+    linear-gradient(160deg, #1e1a17 0%, #14110f 60%, #0c0a09 100%);
+}
+/* METRO/FX — marble, same swatch as VOL/FILTER/PUMP's knob body and
+   ERASE/LATCH's chip. METRO's own on/off uses the standard two-tier
+   engaged glow (chip-top); FX is a second, fully independent toggle
+   living on chip-bottom, so it gets its own color state instead of
+   sharing that glow — otherwise there'd be no way to tell which of
+   the two unrelated toggles a lit button was actually reporting. */
+#btnMetro.two-tier .chip-top{
+  background:radial-gradient(circle at 35% 30%, #faf7ef 0%, #ece5d3 45%, #cec5ac 80%, #b0a88f 100%);
+  color:#202124;
+  text-shadow:0 1px 0 rgba(255,255,255,0.3);
+}
+#btnMetro.two-tier .chip-bottom{
+  background:#1c1c1e;
+  color:rgba(255,255,255,0.32);
+}
+#btnMetro.two-tier.fx-on .chip-bottom{
+  background:linear-gradient(160deg, #c9a468 0%, #b08d57 50%, #8a6a3a 100%);
+  color:#2a1f0f;
+  text-shadow:0 1px 0 rgba(255,255,255,0.2);
+}
+
+.slot-label{
+  font-family:'UnifrakturMaguntia', cursive;
+  font-size:calc(var(--pad-size) * 0.7);
+  line-height:1;
+  font-weight:400;
+  letter-spacing:0;
+  text-align:center;
+  /* blackletter caps sit a little high in their own line-box (room left
+     for descenders that never get used) — nudge down to true-center it */
+  transform:translateY(8%);
+  background:linear-gradient(180deg, #f2e0b8 0%, #d9b571 30%, #a3814f 55%, #c9a468 75%, #5c4423 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  filter:drop-shadow(0 1px 0 #000);
+}
+
+.slot-btn.has-loop{
+  border-color:rgba(255,255,255,0.12);
+}
+
+/* a slot that's currently playing or recording reuses the same
+   .engaged treatment every other button gets — needs to win over the
+   dimmer has-loop border above it */
+.slot-btn.engaged{
+  border-color:rgba(188,46,30,0.5);
+}
+
+/* same bloom as .fn-glow — kept as its own class so the ABCD slot
+   markup reads clearly, but styled identically */
+.slot-glow{
+  position:absolute;
+  inset:0;
+  border-radius:2px;
+  background:radial-gradient(circle at 50% 120%, rgba(188,46,30,0.75), transparent 85%);
+  opacity:0;
+  transition:opacity 0.25s ease;
+  pointer-events:none;
+}
+
+.slot-btn.selected{
+  border-color:rgba(188,46,30,0.55);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.1),
+    0 0 0 1px rgba(188,46,30,0.45),
+    0 0 18px rgba(188,46,30,0.5);
+}
+
+/* momentary hit flash on click, same treatment as a pad — fades out
+   afterward rather than sticking around for as long as it's selected */
+.slot-btn.flash{
+  border-color:rgba(188,46,30,0.55);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.1),
+    0 0 0 1px rgba(188,46,30,0.45),
+    0 0 30px rgba(188,46,30,0.6);
+}
+.slot-btn.flash .slot-glow{ opacity:1; }
+
+/* ---------- rotary knobs: VOL / PUMP / TEMPO all share the pad's
+   diameter; the label overlays below without affecting layout ---------- */
+
+.knob-unit{
+  position:relative;
+  width:var(--pad-size);
+  height:var(--pad-size);
+  outline:none;
+  cursor:grab;
+  touch-action:none;
+}
+.knob-unit:active{ cursor:grabbing; }
+.knob-unit.holding{ cursor:grabbing; }
+
+.knob-body{
+  width:100%;
+  height:100%;
+  border-radius:50%;
+  position:relative;
+  background:linear-gradient(160deg, #8d9096 0%, #55575c 45%, #3a3b3f 100%);
+  border:1px solid #000;
+  box-shadow:0 2px 5px rgba(0,0,0,0.7), inset 0 -2px 3px rgba(0,0,0,0.4);
+}
+/* VOL, FILTER, PUMP — marble white: a clean glossy cream knob with a
+   soft round highlight, no grain/veining */
+[data-param="vol"] .knob-body,
+[data-param="filter"] .knob-body,
+[data-param="pump"] .knob-body{
+  background:radial-gradient(circle at 35% 30%, #faf7ef 0%, #ece5d3 45%, #cec5ac 80%, #b0a88f 100%);
+}
+/* TEMPO — polished bronze, with a specular highlight like a real
+   metal knob catches light */
+[data-param="tempo"] .knob-body{
+  background:
+    radial-gradient(circle at 32% 26%, rgba(255,235,190,0.4), transparent 42%),
+    linear-gradient(160deg, #d9b571 0%, #a3814f 45%, #5c4423 100%);
+}
+.knob-pointer{
+  position:absolute;
+  top:50%;
+  left:50%;
+  width:3.3px;
+  height:clamp(16.5px, 2.64vh, 22px);
+  background:#0a0a0a;
+  border-radius:2px;
+  transform:translate(-50%,-100%) rotate(0deg);
+  transform-origin:50% 100%;
+}
+
+.knob-label{
+  position:absolute;
+  left:50%;
+  bottom:100%;
+  transform:translateX(-50%);
+  margin-bottom:3px;
+  font-family:'Eagle Lake', cursive;
+  font-size:8.5px;
+  letter-spacing:0.5px;
+  color:var(--chrome-mid);
+  text-align:center;
+  white-space:nowrap;
+  pointer-events:none;
+}
+
+/* TEMPO/SWING, FILTER/DELAY, PUMP/CRUSH: both names stay on screen all
+   the time now — the primary label above stays put, the SHIFT-layer
+   name sits rotated 90deg to the right instead of swapping in on top
+   of it. No more red ring either; the knob still turns the secondary
+   parameter while SHIFT is held, it just isn't called out visually. */
+.knob-label-secondary{
+  position:absolute;
+  left:100%;
+  top:0;
+  bottom:0;
+  width:14px;
+  margin-left:4px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+}
+.knob-label-secondary span{
+  display:inline-block;
+  transform:rotate(90deg);
+  font-family:'Eagle Lake', cursive;
+  font-size:8.5px;
+  letter-spacing:0.5px;
+  color:var(--chrome-mid);
+  white-space:nowrap;
+}
+
+/* ---------- VOL level meter ----------
+   Small LED-style segment stack printed on the screen, not on the
+   knob — sits left of the TIME/PUMP column, bottom-anchored under
+   the icon grid. Same idea as a hardware input meter: bottom
+   segments read "safe", the top one "hot". Lights bottom-up as the
+   VOL knob turns up, in the machine's own palette (marble white ->
+   bronze -> signal red -> grape purple) rather than a generic
+   green/yellow/red. Each square segment is itself split into four
+   thin horizontal bars, like a hardware LED-bargraph cell. The four
+   segments are sized and gapped exactly like the icon grid's own
+   cells, so each one lines up with a square icon beside it. */
+.vol-meter{
+  position:absolute;
+  /* Now a child of #lcdIconGrid (like SHIFT/SHIELD/etc) instead of a
+     sibling positioned off .lcd-body's right edge, so its clearance
+     from SHIFT/SHIELD can be expressed directly against --col-b3 and
+     --shift-w — those two vary independently now (col-b3 sometimes
+     needs to clear the digit readout; shift-w is fixed-width), so a
+     fixed offset from the screen's own edge could drift into an
+     overlap at some viewport sizes where the old ratio didn't hold. */
+  left:calc(100% + var(--vol-left));
+  bottom:0;
+  width:calc(var(--icon-sq) * 1.2);
+  height:calc(var(--icon-sq) * 0.96 * 4 + var(--icon-sq) * 0.24 * 3);
+  display:flex;
+  flex-direction:column;
+  gap:calc(var(--icon-sq) * 0.24);
+  pointer-events:none;
+}
+.vol-seg{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:calc(var(--icon-sq) * 0.06);
+}
+.vol-bar{
+  flex:1;
+  border-radius:1px;
+  background:rgba(255,255,255,0.14);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,0.04);
+  transition:background 0.15s ease, box-shadow 0.15s ease;
+}
+.vol-seg[data-seg="1"] .vol-bar.lit{
+  background:#f0ece0;
+  box-shadow:0 0 5px rgba(240,236,224,0.75);
+}
+.vol-seg[data-seg="2"] .vol-bar.lit{
+  background:#f0ece0;
+  box-shadow:0 0 5px rgba(240,236,224,0.75);
+}
+.vol-seg[data-seg="3"] .vol-bar.lit{
+  background:#b08d57;
+  box-shadow:0 0 5px rgba(176,141,87,0.75);
+}
+.vol-seg[data-seg="4"] .vol-bar.lit{
+  background:#c81c26;
+  box-shadow:0 0 6px rgba(200,28,38,0.85);
+}
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 460px){
+  :root{
+    --pad-size:clamp(40px, 5.94vh, 59px);
+    /* The digit readout needs less pad-size clearance from the grid's
+       right edge at this cramped a width than the 4.44 floor used
+       above (measured ~3.68 here vs ~3.87-3.93 at wider viewports) —
+       reusing the wider floor left no room for the vol-meter before
+       colC's TIME/PUMP/OUT. */
+    --col-b3:max(var(--col-b3-correct), calc(var(--pad-size) * 3.3));
+    /* SHIFT's badge matches the shield icon's width at every
+       breakpoint now (see :root) — no separate mobile override
+       needed, kept here as an explicit point in case a future pass
+       needs one. */
+    --shift-w:calc(var(--icon-sq) * 2 + var(--icon-gap));
+    /* RPT/PLAY's column reaches under the digit readout's left edge at
+       this width (measured clearance ~0.99*pad-size here vs ~1.6-1.67
+       at wider viewports) — cap it, same tension as --col-b3 but
+       bounding from above instead of below since this breakpoint can't
+       afford the desktop rule's inward pull. */
+    --col-a2:min(calc(var(--icon-sq) + var(--icon-gap) * 2), calc(var(--icon-gap) + var(--icon-sq)));
+    /* The desktop 3-square shield (grown into row3 now that METRO/SWING
+       moved off it) pushes the vol-meter/colC chain far enough right to
+       clip past the LCD's own edge at this width — back off to the
+       original 2-square size here, resting on row2's bottom like
+       before, so mobile keeps the tighter footprint it needs. */
+    --shield-w:calc(var(--icon-sq) * 2 + var(--icon-gap));
+    --shield-bottom:calc((var(--icon-sq) + var(--icon-gap)) * 2);
+    /* At this width, --col-b3 doesn't leave enough room for FILTER,
+       DELAY AND SWING's square all to fit ahead of the shield, even
+       with zero gap between them (SWING's one square alone overruns
+       what's left over) — so SWING falls back to sitting next to
+       SHIFT again here (see the #lcdSwingLabel override below), and
+       this reverts to the plain two-way FILTER-DELAY/DELAY-shield
+       split rather than the three-way solve that includes SWING. */
+    --row1-gap:calc((var(--col-b3) - var(--row1-filter-left) - var(--w2) * 2) / 2);
+    /* SWING sitting next to SHIFT again here (see override below) means
+       the group now extends past shield-w by SWING's own square plus
+       its gap, so --vol-left needs to account for that too, same
+       tension as earlier passes — trimmed to a smaller breathing gap
+       to still fit before the LCD's own edge. */
+    --vol-left:calc(var(--col-b3) + var(--shield-w) + var(--icon-gap) + var(--icon-sq) + var(--icon-gap) * 0.85);
+  }
+  #lcdSwingLabel{
+    left:calc(100% + var(--col-b3) + var(--shift-center-offset) + var(--shift-w) + var(--icon-gap));
+    bottom:0;
+  }
+  .deck-main{
+    display:flex;
+    flex-direction:row;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+  }
+  .side-col-left{ display:flex; grid-column:auto; grid-row:auto; flex-direction:row; }
+  .pad-grid,
+  .slot-btn,
+  #btnOutput,
+  #btnMetro,
+  #btnRepeat,
+  #btnTime{ grid-column:auto; grid-row:auto; }
+  .fader-unit{ height:auto; }
+  .fader-track{ height:clamp(64px, 9vh, 96px); }
+  .fader-label{ position:static; transform:none; margin-top:6px; }
+  .top-controls-row{ display:flex; flex-wrap:wrap; justify-content:center; align-items:flex-end; gap:14px; }
+  .top-controls-row [data-param="tempo"],
+  .top-controls-row [data-param="filter"]{ grid-column:auto; }
+}
