@@ -13,7 +13,7 @@
   --text-dim:#8a8a90;
   --pad-face:#1a1b1e;
   --pad-face-2:#101114;
-  --pad-size:clamp(46px, 6.16vh, 64px);
+  --pad-size:clamp(41.4px, 5.544vh, 57.6px);
   --pad-gap:calc(var(--pad-size) / 2);
   /* LCD icon-grid's own unit — deliberately NOT a fixed ratio of
      --pad-size, solved instead from the screen's own total height
@@ -537,8 +537,8 @@ body{
   filter:drop-shadow(0 0 5px #f0ece0) drop-shadow(0 0 10px rgba(240,236,224,0.85));
 }
 .lcd-shield-icon .shield-quadrant[data-slot="C"].lit path{
-  fill:#2f6fdb;
-  filter:drop-shadow(0 0 5px #2f6fdb) drop-shadow(0 0 10px rgba(47,111,219,0.85));
+  fill:#0f52ba;
+  filter:drop-shadow(0 0 5px #0f52ba) drop-shadow(0 0 10px rgba(15,82,186,0.85));
 }
 .lcd-shield-icon .shield-quadrant[data-slot="D"].lit path{
   fill:#f0ece0;
@@ -1363,7 +1363,7 @@ body{
 
 @media (max-width: 460px){
   :root{
-    --pad-size:clamp(40px, 5.94vh, 59px);
+    --pad-size:clamp(36px, 5.346vh, 53.1px);
     /* The digit readout needs less pad-size clearance from the grid's
        right edge at this cramped a width than the 4.44 floor used
        above (measured ~3.68 here vs ~3.87-3.93 at wider viewports) —
