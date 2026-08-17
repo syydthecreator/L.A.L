@@ -13,7 +13,7 @@
   --text-dim:#8a8a90;
   --pad-face:#1a1b1e;
   --pad-face-2:#101114;
-  --pad-size:clamp(41.4px, 5.544vh, 57.6px);
+  --pad-size:clamp(41.4px, 5.544dvh, 57.6px);
   --pad-gap:calc(var(--pad-size) / 2);
   /* LCD icon-grid's own unit — deliberately NOT a fixed ratio of
      --pad-size, solved instead from the screen's own total height
@@ -151,13 +151,13 @@ body{
 
 .page{
   position:relative;
-  height:100vh;
+  height:100dvh;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
   gap:16px;
-  padding:clamp(10px, 2vh, 24px) 16px;
+  padding:clamp(10px, 2dvh, 24px) 16px;
   overflow:hidden;
 }
 
@@ -168,7 +168,7 @@ body{
 .instrument{
   position:relative;
   width:min(max-content, 92vw);
-  max-height:calc(100vh - 20px);
+  max-height:calc(100dvh - 20px);
   z-index:1;
 }
 
@@ -188,10 +188,10 @@ body{
     inset 0 20px 40px rgba(0,0,0,0.5),
     0 30px 60px rgba(0,0,0,0.65),
     0 4px 10px rgba(0,0,0,0.5);
-  padding:clamp(9px, 1.32vh, 15px) calc(var(--pad-size) / 2) var(--pad-size);
+  padding:clamp(9px, 1.32dvh, 15px) calc(var(--pad-size) / 2) var(--pad-size);
   display:flex;
   flex-direction:column;
-  gap:clamp(7px, 1.1vh, 11px);
+  gap:clamp(7px, 1.1dvh, 11px);
   z-index:2;
   overflow:hidden;
 }
@@ -214,8 +214,8 @@ body{
      net effect: this row's own bottom edge lands exactly on the LCD's
      top edge, so anything sized to 100% of this row (the grille) lines
      up with the LCD with no separate bleed math needed */
-  height:calc(2.5 * var(--pad-size) + clamp(7px, 1.1vh, 11px));
-  margin-bottom:calc(-1 * clamp(7px, 1.1vh, 11px));
+  height:calc(2.5 * var(--pad-size) + clamp(7px, 1.1dvh, 11px));
+  margin-bottom:calc(-1 * clamp(7px, 1.1dvh, 11px));
   flex-shrink:0;
 }
 
@@ -232,8 +232,8 @@ body{
 }
 
 .crest{
-  width:clamp(35px, 5.5vh, 53px);
-  height:clamp(35px, 5.5vh, 53px);
+  width:clamp(35px, 5.5dvh, 53px);
+  height:clamp(35px, 5.5dvh, 53px);
   flex-shrink:0;
   filter:drop-shadow(0 2px 3px rgba(0,0,0,0.6));
 }
@@ -241,7 +241,7 @@ body{
 .wordmark{
   margin:0;
   font-family:'UnifrakturMaguntia', cursive;
-  font-size:clamp(22px, 3.96vh, 35px);
+  font-size:clamp(22px, 3.96dvh, 35px);
   line-height:1;
   letter-spacing:1px;
   background:linear-gradient(180deg, #f2e0b8 0%, #d9b571 30%, #a3814f 55%, #c9a468 75%, #5c4423 100%);
@@ -253,7 +253,7 @@ body{
 
 .brand-tagline{
   font-family:'Eagle Lake', cursive;
-  font-size:8.5px;
+  font-size:min(8.5px, calc(var(--pad-size) * 0.2053));
   letter-spacing:2px;
   color:var(--chrome-mid);
   /* pinned to the header's top-left corner, out of flow so it can't
@@ -269,10 +269,10 @@ body{
      (see .header-row) — so the grille only needs to bleed upward
      through the chassis's top padding to touch the outer edge; its
      bottom then lands precisely on the LCD with no separate match */
-  height:calc(100% + clamp(9px, 1.32vh, 15px) + 2px);
+  height:calc(100% + clamp(9px, 1.32dvh, 15px) + 2px);
   aspect-ratio:1 / 1;
   flex-shrink:0;
-  margin-top:calc(-1 * clamp(9px, 1.32vh, 15px) - 2px);
+  margin-top:calc(-1 * clamp(9px, 1.32dvh, 15px) - 2px);
   margin-right:calc(-1 * var(--pad-size) / 2 - 2px);
   border-radius:0 6px 0 0;
   background:
@@ -623,7 +623,7 @@ body{
   display:none;
   font-family:'JetBrains Mono', monospace;
   font-weight:800;
-  font-size:clamp(20px, 3.3vh, 33px);
+  font-size:clamp(20px, 3.3dvh, 33px);
   letter-spacing:4px;
   text-align:center;
   color:#ffecec;
@@ -646,7 +646,7 @@ body{
   /* chassis-face's own gap between the LCD and control-deck is smaller
      than a half-square (it also separates header-row/LCD) — top this up
      so LCD-to-top-row is exactly half a pad-square too */
-  margin-top:calc(var(--pad-gap) - clamp(7px, 1.1vh, 11px));
+  margin-top:calc(var(--pad-gap) - clamp(7px, 1.1dvh, 11px));
 }
 
 /* deck-main and top-controls-row share the same 6-column grid
@@ -676,6 +676,14 @@ body{
 .side-col-left [data-param="pump"]{ grid-row:1; }
 .side-col-left .fader-unit{ grid-row:2 / 4; }
 .side-col-left #btnShift{ grid-row:4; align-self:start; }
+/* .slot-col/.fn-col wrap the ABCD and OUT/METRO/RPT/TIME button groups
+   in the markup (so mobile can treat each group as one atomic flex
+   item — see the mobile override). At every wider breakpoint they're
+   display:contents — invisible to layout — so the grid-column/grid-row
+   rules below still address the buttons directly, same as if the
+   wrapper weren't there. */
+.slot-col,
+.fn-col{ display:contents; }
 .slot-btn[data-slot="A"]{ grid-column:2; grid-row:1; }
 .slot-btn[data-slot="B"]{ grid-column:2; grid-row:2; }
 .slot-btn[data-slot="C"]{ grid-column:2; grid-row:3; }
@@ -703,7 +711,7 @@ body{
   width:var(--pad-size);
   height:var(--pad-size);
   min-width:0;
-  padding:clamp(4px, 0.77vh, 7px);
+  padding:clamp(4px, 0.77dvh, 7px);
   justify-content:center;
 }
 
@@ -711,7 +719,7 @@ body{
    height ROOM's two-square fader needs in the same column */
 .fn-btn.fn-pad.fn-half{
   height:calc(var(--pad-size) / 2);
-  padding:clamp(2px, 0.4vh, 4px);
+  padding:clamp(2px, 0.4dvh, 4px);
 }
 
 /* ---------- fader (ROOM): locked to exactly two pad-squares tall ---------- */
@@ -735,7 +743,20 @@ body{
 
 .fader-track{
   position:relative;
-  width:clamp(29px, 3.96vh, 37px);
+  /* Tied to --pad-size (like the track's own height already is, via
+     the fader-unit it fills) instead of dvh, which used to move on a
+     completely different axis than the rest of the machine — fine on
+     desktop where both happened to track the same viewport-height
+     scale, but on mobile, once --pad-size picked up its own
+     width-based ceiling, dvh alone no longer shrank to match, so the
+     track (and the puck below) stayed relatively oversized against
+     the now-smaller knobs/pads around them. min() keeps this close to
+     the old rendered value across the desktop range (they were never
+     perfectly locked together even before — each had its own dvh
+     clamp with a different breakpoint), and now actually shrinks in
+     step with --pad-size once mobile's width-based ceiling pulls it
+     below the desktop floor. */
+  width:min(37px, calc(var(--pad-size) * 0.72));
   height:calc(100% - 8px);
   border-radius:2px;
   background:linear-gradient(180deg, #0d0d0f 0%, #08080a 100%);
@@ -759,8 +780,12 @@ body{
   position:absolute;
   left:50%;
   top:50%;
-  width:clamp(22px, 3.08vh, 29px);
-  height:clamp(14px, 1.98vh, 18px);
+  /* Same fix as .fader-track above — tied to --pad-size instead of an
+     independent dvh clamp, so the puck ("the red handle") shrinks in
+     step with the track around it instead of staying relatively
+     oversized once mobile's width-based ceiling kicks in. */
+  width:min(29px, calc(var(--pad-size) * 0.56));
+  height:min(18px, calc(var(--pad-size) * 0.36));
   border-radius:3px;
   background:linear-gradient(160deg, #b03a28 0%, #7a1810 40%, #4a0f0a 72%, #2a0805 100%);
   border:1px solid #000;
@@ -791,7 +816,7 @@ body{
   transform:translateX(-50%);
   margin-bottom:3px;
   font-family:'Eagle Lake', cursive;
-  font-size:8.5px;
+  font-size:min(8.5px, calc(var(--pad-size) * 0.2053));
   letter-spacing:1px;
   color:var(--chrome-mid);
   white-space:nowrap;
@@ -836,7 +861,7 @@ body{
   transform:translateX(-50%);
   margin-bottom:3px;
   font-family:'Eagle Lake', cursive;
-  font-size:8.5px;
+  font-size:min(8.5px, calc(var(--pad-size) * 0.2053));
   font-weight:400;
   letter-spacing:0.5px;
   color:var(--chrome-mid);
@@ -891,7 +916,7 @@ body{
   flex:0 0 auto;
   width:100%;
   min-width:56px;
-  padding:clamp(5px, 0.9vh, 8px) clamp(9px, 1.4vw, 14px) clamp(4px, 0.8vh, 7px);
+  padding:clamp(5px, 0.9dvh, 8px) clamp(9px, 1.4vw, 14px) clamp(4px, 0.8dvh, 7px);
   border-radius:2px;
   border:1px solid #000;
   background:#17171a;
@@ -926,14 +951,14 @@ body{
 .fn-primary{
   font-family:'Eagle Lake', cursive;
   font-weight:400;
-  font-size:8.5px;
+  font-size:min(8.5px, calc(var(--pad-size) * 0.2053));
   letter-spacing:0.3px;
   color:var(--chrome-hi);
 }
 
 .fn-secondary{
   font-family:'Eagle Lake', cursive;
-  font-size:8.5px;
+  font-size:min(8.5px, calc(var(--pad-size) * 0.2053));
   letter-spacing:0.5px;
   color:#b9525a;
 }
@@ -998,7 +1023,7 @@ body{
   align-items:center;
   justify-content:center;
   font-family:'Eagle Lake', cursive;
-  font-size:8.5px;
+  font-size:min(8.5px, calc(var(--pad-size) * 0.2053));
   font-weight:400;
   letter-spacing:0.2px;
   white-space:nowrap;
@@ -1009,7 +1034,7 @@ body{
   border:1px solid #000;
   border-radius:2px 2px 0 0;
   box-shadow:inset 0 -3px 5px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.4);
-  padding:0 clamp(9px, 1.4vw, 14px);
+  padding:0 calc(var(--pad-size) * 0.2);
 }
 .two-tier .chip-bottom{
   border:1px solid #000;
@@ -1251,7 +1276,12 @@ body{
   top:50%;
   left:50%;
   width:3.3px;
-  height:clamp(16.5px, 2.64vh, 22px);
+  /* Same fix as the fader track/puck — tied to --pad-size (the same
+     value the knob itself is sized off) instead of an independent dvh
+     clamp, so the pointer stays proportional to its own knob at every
+     breakpoint instead of only tracking desktop's viewport-height
+     scale. */
+  height:min(22px, calc(var(--pad-size) * 0.44));
   background:#0a0a0a;
   border-radius:2px;
   transform:translate(-50%,-100%) rotate(0deg);
@@ -1265,7 +1295,7 @@ body{
   transform:translateX(-50%);
   margin-bottom:3px;
   font-family:'Eagle Lake', cursive;
-  font-size:8.5px;
+  font-size:min(8.5px, calc(var(--pad-size) * 0.2053));
   letter-spacing:0.5px;
   color:var(--chrome-mid);
   text-align:center;
@@ -1294,7 +1324,7 @@ body{
   display:inline-block;
   transform:rotate(90deg);
   font-family:'Eagle Lake', cursive;
-  font-size:8.5px;
+  font-size:min(8.5px, calc(var(--pad-size) * 0.2053));
   letter-spacing:0.5px;
   color:var(--chrome-mid);
   white-space:nowrap;
@@ -1363,69 +1393,46 @@ body{
 
 @media (max-width: 460px){
   :root{
-    --pad-size:clamp(36px, 5.346vh, 53.1px);
-    /* The digit readout needs less pad-size clearance from the grid's
-       right edge at this cramped a width than the 4.44 floor used
-       above (measured ~3.68 here vs ~3.87-3.93 at wider viewports) —
-       reusing the wider floor left no room for the vol-meter before
-       colC's TIME/PUMP/OUT. */
-    --col-b3:max(var(--col-b3-correct), calc(var(--pad-size) * 3.3));
-    /* SHIFT's badge matches the shield icon's width at every
-       breakpoint now (see :root) — no separate mobile override
-       needed, kept here as an explicit point in case a future pass
-       needs one. */
-    --shift-w:calc(var(--icon-sq) * 2 + var(--icon-gap));
-    /* RPT/PLAY's column reaches under the digit readout's left edge at
-       this width (measured clearance ~0.99*pad-size here vs ~1.6-1.67
-       at wider viewports) — cap it, same tension as --col-b3 but
-       bounding from above instead of below since this breakpoint can't
-       afford the desktop rule's inward pull. */
-    --col-a2:min(calc(var(--icon-sq) + var(--icon-gap) * 2), calc(var(--icon-gap) + var(--icon-sq)));
-    /* The desktop 3-square shield (grown into row3 now that METRO/SWING
-       moved off it) pushes the vol-meter/colC chain far enough right to
-       clip past the LCD's own edge at this width — back off to the
-       original 2-square size here, resting on row2's bottom like
-       before, so mobile keeps the tighter footprint it needs. */
-    --shield-w:calc(var(--icon-sq) * 2 + var(--icon-gap));
-    --shield-bottom:calc((var(--icon-sq) + var(--icon-gap)) * 2);
-    /* At this width, --col-b3 doesn't leave enough room for FILTER,
-       DELAY AND SWING's square all to fit ahead of the shield, even
-       with zero gap between them (SWING's one square alone overruns
-       what's left over) — so SWING falls back to sitting next to
-       SHIFT again here (see the #lcdSwingLabel override below), and
-       this reverts to the plain two-way FILTER-DELAY/DELAY-shield
-       split rather than the three-way solve that includes SWING. */
-    --row1-gap:calc((var(--col-b3) - var(--row1-filter-left) - var(--w2) * 2) / 2);
-    /* SWING sitting next to SHIFT again here (see override below) means
-       the group now extends past shield-w by SWING's own square plus
-       its gap, so --vol-left needs to account for that too, same
-       tension as earlier passes — trimmed to a smaller breathing gap
-       to still fit before the LCD's own edge. */
-    --vol-left:calc(var(--col-b3) + var(--shield-w) + var(--icon-gap) + var(--icon-sq) + var(--icon-gap) * 0.85);
+    /* Keeping the real desktop grid at this width (see the deck-main
+       note below) means --pad-size has to respect the SCREEN'S WIDTH
+       too, not just its height — the 7-column control-deck grid is
+       10 pad-squares wide (7 squares + 6 half-square gaps), plus the
+       chassis-face's own horizontal padding (one more pad-square,
+       split across both sides), so the whole instrument needs roughly
+       11 pad-squares to fit within .instrument's own width ceiling
+       (92vw, minus .page's 16px side padding on each edge). Solving
+       11S = 92vw - 32px for S gives the ~8vw coefficient below; 7.9vw
+       leaves a small safety margin for rounding/borders instead of
+       landing exactly on the limit. min() picks whichever of the
+       height-based and width-based figures is smaller, so pad-size
+       backs off from either ceiling it hits first. */
+    --pad-size:clamp(28px, min(5.346dvh, 7.9vw), 53.1px);
+    /* Every icon-grid quantity below (--col-b3, --shield-w, the row1
+       SWING solve, etc.) is calc()'d purely off --icon-sq, which is
+       itself a fixed ratio of --pad-size — so now that the whole LCD
+       screen's own width also just scales down with --pad-size (same
+       as the rest of the instrument, per the deck-main note below),
+       these formulas stay in the same proportion to their available
+       space at any breakpoint. The shield-size/row1-SWING/col-b3
+       overrides that used to live here were tuned for an earlier
+       version of mobile's pad-size range (before it also picked up
+       today's width-based ceiling) and are gone — screenshotted clean
+       at 320-430px with the root desktop formulas alone. */
   }
-  #lcdSwingLabel{
-    left:calc(100% + var(--col-b3) + var(--shift-center-offset) + var(--shift-w) + var(--icon-gap));
-    bottom:0;
-  }
-  .deck-main{
-    display:flex;
-    flex-direction:row;
-    flex-wrap:wrap;
-    align-items:center;
-    justify-content:center;
-    gap:10px;
-  }
-  .side-col-left{ display:flex; grid-column:auto; grid-row:auto; flex-direction:row; }
-  .pad-grid,
-  .slot-btn,
-  #btnOutput,
-  #btnMetro,
-  #btnRepeat,
-  #btnTime{ grid-column:auto; grid-row:auto; }
-  .fader-unit{ height:auto; }
-  .fader-track{ height:clamp(64px, 9vh, 96px); }
-  .fader-label{ position:static; transform:none; margin-top:6px; }
-  .top-controls-row{ display:flex; flex-wrap:wrap; justify-content:center; align-items:flex-end; gap:14px; }
-  .top-controls-row [data-param="tempo"],
-  .top-controls-row [data-param="filter"]{ grid-column:auto; }
+  /* Mobile used to rebuild deck-main as a wrapping flex layout instead
+     of the desktop grid — meant to dodge the grid's fixed width, but
+     it re-sorted the controls into different relative positions than
+     the desktop version (PUMP/ROOM/SHIFT above the pad grid instead of
+     beside it, slot buttons splitting away from the pad grid, TEMPO/
+     FILTER dropping out of the top row), so the phone no longer read
+     as "the same instrument, smaller." Dropping that override lets the
+     same grid rules used everywhere else apply here too — the phone
+     now looks exactly like the desktop version, just scaled down,
+     which only works because --pad-size's width-based ceiling below
+     keeps the (unchanged) 7-column grid narrow enough to fit. Every
+     label's font-size and the two-tier chips' own padding are now
+     calc()'d off --pad-size directly in their base rules (see .chip,
+     .pad-name, .knob-label, etc.) instead of fixed px or vh/vw units,
+     so they already scale down here in lockstep with the buttons —
+     no separate mobile override needed for any of that anymore. */
 }
