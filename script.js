@@ -2137,3 +2137,4 @@ if (lcdLabelEls.fx) lcdLabelEls.fx.classList.toggle("lit", fxOn);
 // the digit readout is never blank — it always shows something, and
 // TEMPO is the default until some other control's value takes over
 showLcdNumber(tempoBpm);
+
