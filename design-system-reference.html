@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>L.A.L. — Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Eagle+Lake&family=Pirata+One&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#08080a;
+    --panel:#0c0c0e;
+    --panel-2:#101012;
+    --line:rgba(255,255,255,0.08);
+    --text:#e9e9ec;
+    --text-dim:#8a8a90;
+    --chrome-hi:#d9b571;
+    --chrome-mid:#a3814f;
+    --chrome-lo:#5c4423;
+  }
+  *{ box-sizing:border-box; }
+  html,body{
+    margin:0;
+    background:var(--bg-0);
+    color:var(--text);
+    font-family:'JetBrains Mono', monospace;
+  }
+  body{
+    padding:48px 20px 80px;
+  }
+  .wrap{
+    max-width:920px;
+    margin:0 auto;
+  }
+  header{
+    margin-bottom:56px;
+  }
+  .kicker{
+    font-size:11px;
+    letter-spacing:2.5px;
+    color:var(--chrome-hi);
+    text-transform:uppercase;
+    margin-bottom:14px;
+  }
+  h1{
+    font-family:'UnifrakturMaguntia', cursive;
+    font-size:clamp(34px, 6vw, 54px);
+    margin:0 0 16px;
+    background:linear-gradient(180deg, #f2e0b8 0%, #d9b571 30%, #a3814f 55%, #c9a468 75%, #5c4423 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    line-height:1.15;
+  }
+  .subtitle{
+    font-size:15px;
+    color:var(--text-dim);
+    line-height:1.6;
+    max-width:640px;
+  }
+  section{
+    margin-bottom:56px;
+  }
+  h2{
+    font-family:'Eagle Lake', cursive;
+    font-weight:400;
+    font-size:22px;
+    letter-spacing:0.5px;
+    color:var(--chrome-hi);
+    border-bottom:1px solid var(--line);
+    padding-bottom:12px;
+    margin:0 0 24px;
+  }
+  .note{
+    font-size:13px;
+    color:var(--text-dim);
+    line-height:1.7;
+    margin:0 0 20px;
+    max-width:680px;
+  }
+  code{
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:1px 6px;
+    font-size:12px;
+    color:var(--chrome-hi);
+  }
+
+  /* type samples */
+  .type-row{
+    display:flex;
+    align-items:baseline;
+    gap:24px;
+    padding:18px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .type-row:last-child{ border-bottom:none; }
+  .type-sample{
+    font-size:30px;
+    min-width:220px;
+    color:var(--text);
+  }
+  .type-meta{
+    font-size:12px;
+    color:var(--text-dim);
+    line-height:1.6;
+  }
+  .type-meta b{ color:var(--text); font-weight:500; }
+  .f-unifraktur{ font-family:'UnifrakturMaguntia', cursive; }
+  .f-eagle{ font-family:'Eagle Lake', cursive; font-size:22px; }
+  .f-pirata{ font-family:'Pirata One', cursive; font-size:22px; }
+  .f-mono{ font-family:'JetBrains Mono', monospace; font-weight:800; }
+
+  /* swatches */
+  .swatch-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));
+    gap:16px;
+  }
+  .swatch{
+    border:1px solid var(--line);
+    border-radius:6px;
+    overflow:hidden;
+    background:var(--panel);
+  }
+  .swatch-fill{
+    height:88px;
+  }
+  .swatch-body{
+    padding:12px 14px 14px;
+  }
+  .swatch-name{
+    font-size:13px;
+    color:var(--text);
+    margin-bottom:4px;
+  }
+  .swatch-use{
+    font-size:11px;
+    color:var(--text-dim);
+    line-height:1.5;
+  }
+  .swatch-hex{
+    font-size:10px;
+    color:var(--chrome-mid);
+    margin-top:6px;
+    word-break:break-all;
+  }
+
+  /* materials */
+  .material-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));
+    gap:16px;
+  }
+  .material{
+    text-align:center;
+  }
+  .material-swatch{
+    height:110px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    margin-bottom:10px;
+  }
+  .material-label{
+    font-size:12px;
+    color:var(--text);
+  }
+
+  /* spacing/radius/states */
+  .kv-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+  }
+  .kv-table td{
+    padding:10px 0;
+    border-bottom:1px solid var(--line);
+    vertical-align:top;
+  }
+  .kv-table td:first-child{
+    color:var(--chrome-hi);
+    width:180px;
+    padding-right:20px;
+  }
+  .kv-table td:last-child{
+    color:var(--text-dim);
+    line-height:1.6;
+  }
+
+  .radius-row{
+    display:flex;
+    gap:20px;
+    flex-wrap:wrap;
+  }
+  .radius-item{
+    text-align:center;
+  }
+  .radius-box{
+    width:64px;
+    height:64px;
+    background:linear-gradient(160deg, #2a2a2d, #141416);
+    border:1px solid var(--line);
+    margin-bottom:8px;
+  }
+  .radius-label{
+    font-size:11px;
+    color:var(--text-dim);
+  }
+
+  footer{
+    margin-top:64px;
+    padding-top:24px;
+    border-top:1px solid var(--line);
+    font-size:11px;
+    color:var(--text-dim);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="kicker">Lucilla Aurelius Launchpad</div>
+    <h1>L.A.L. — Design System</h1>
+    <p class="subtitle">Chrome Hearts × teenage engineering, cast in bronze instead of silver: gothic blackletter on a matte-black hardware chassis, surfaced in cast bronze, bone/marble ivory, and dark oxblood glass.</p>
+  </header>
+
+  <section>
+    <h2>Typography</h2>
+    <div class="type-row">
+      <div class="type-sample f-unifraktur">Lucilla</div>
+      <div class="type-meta"><b>UnifrakturMaguntia</b> — wordmark, ABCD slot letters. Sizes: wordmark <code>clamp(22–35px)</code>, ABCD letters <code>pad-size × 0.7</code>. The one indulgence: the only text on the chassis that isn't the plain mono/blackletter-label grid.</div>
+    </div>
+    <div class="type-row">
+      <div class="type-sample f-eagle">Tempo</div>
+      <div class="type-meta"><b>Eagle Lake</b> — buttons, knobs, pad names, fader, tagline. <code>min(8.5px, pad-size × 0.2053)</code> — nominally 8.5px, scales down only below the mobile pad-size floor.</div>
+    </div>
+    <div class="type-row">
+      <div class="type-sample f-pirata">Filter</div>
+      <div class="type-meta"><b>Pirata One</b> — LCD icon-grid screen labels only (FILTER, DELAY, TEMPO, ERASE, CORRECT, SHIFT, TIME, PUMP, OUT). A third blackletter voice, reserved for the screen.</div>
+    </div>
+    <div class="type-row">
+      <div class="type-sample f-mono">128</div>
+      <div class="type-meta"><b>JetBrains Mono</b> — LCD digit readout (<code>clamp(20–33px)</code>, weight 800) and the base UI font everywhere else.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Color</h2>
+    <p class="note">The <code>--chrome-*</code> token names are legacy from an earlier silver palette — their actual values are warm bronze/gold now, not chrome. Kept as-is rather than renamed, to avoid touching every rule that references them.</p>
+    <div class="swatch-grid">
+
+      <div class="swatch">
+        <div class="swatch-fill" style="background:linear-gradient(160deg, #f2e0b8 0%, #d9b571 30%, #c9a468 55%, #a3814f 75%, #5c4423 100%);"></div>
+        <div class="swatch-body">
+          <div class="swatch-name">Bronze family</div>
+          <div class="swatch-use">Wordmark/ABCD gradient, grille, SHIFT/OUT buttons, TEMPO knob, shield "A" signal, TIME/CORR chip — the machine's primary metal</div>
+          <div class="swatch-hex">#f2e0b8 → #d9b571 → #a3814f → #5c4423</div>
+        </div>
+      </div>
+
+      <div class="swatch">
+        <div class="swatch-fill" style="background:radial-gradient(circle at 35% 30%, #faf7ef 0%, #ece5d3 45%, #cec5ac 80%, #b0a88f 100%);"></div>
+        <div class="swatch-body">
+          <div class="swatch-name">Bone / marble ivory</div>
+          <div class="swatch-use">Pad keycaps, VOL/FILTER/PUMP knobs, ERASE/LATCH chip, shield "B"/"D" signal</div>
+          <div class="swatch-hex">#faf7ef → #ece5d3 → #cec5ac → #b0a88f</div>
+        </div>
+      </div>
+
+      <div class="swatch">
+        <div class="swatch-fill" style="background:linear-gradient(160deg, #b03a28 0%, #7a1810 40%, #4a0f0a 72%, #2a0805 100%);"></div>
+        <div class="swatch-body">
+          <div class="swatch-name">Oxblood glass</div>
+          <div class="swatch-use">LCD screen background, REC chip</div>
+          <div class="swatch-hex">#b03a28 → #7a1810 → #4a0f0a → #2a0805</div>
+        </div>
+      </div>
+
+      <div class="swatch">
+        <div class="swatch-fill" style="background:linear-gradient(160deg, #8d9096 0%, #55575c 45%, #3a3b3f 100%);"></div>
+        <div class="swatch-body">
+          <div class="swatch-name">Gunmetal steel</div>
+          <div class="swatch-use">Default knob body — any knob not overridden to bronze or bone</div>
+          <div class="swatch-hex">#8d9096 → #55575c → #3a3b3f</div>
+        </div>
+      </div>
+
+      <div class="swatch">
+        <div class="swatch-fill" style="background:#0f52ba;"></div>
+        <div class="swatch-body">
+          <div class="swatch-name">Sapphire</div>
+          <div class="swatch-use">Single accent — shield icon's "C" slot signal only</div>
+          <div class="swatch-hex">#0f52ba</div>
+        </div>
+      </div>
+
+      <div class="swatch">
+        <div class="swatch-fill" style="background:linear-gradient(160deg, #5c1f78 0%, #3f1450 55%, #260a30 100%);"></div>
+        <div class="swatch-body">
+          <div class="swatch-name">Grape purple</div>
+          <div class="swatch-use">Single accent — RPT chip only</div>
+          <div class="swatch-hex">#5c1f78 → #3f1450 → #260a30</div>
+        </div>
+      </div>
+
+      <div class="swatch">
+        <div class="swatch-fill" style="background:linear-gradient(160deg, #7c0f16 0%, #c81c26 55%, #ff2b39 100%);"></div>
+        <div class="swatch-body">
+          <div class="swatch-name">Signal red</div>
+          <div class="swatch-use">Engaged-state glow, LEDs, LCD icon lit-state</div>
+          <div class="swatch-hex">--red #7c0f16 · --red-hi #c81c26 · --red-glow #ff2b39</div>
+        </div>
+      </div>
+
+      <div class="swatch">
+        <div class="swatch-fill" style="background:linear-gradient(180deg, #101012 0%, #0c0c0e 55%, #08080a 100%);"></div>
+        <div class="swatch-body">
+          <div class="swatch-name">Chassis darks</div>
+          <div class="swatch-use">--bg-0, --panel, --panel-2 — body, chassis face, recesses</div>
+          <div class="swatch-hex">#08080a · #0c0c0e · #101012</div>
+        </div>
+      </div>
+
+      <div class="swatch">
+        <div class="swatch-fill" style="background:linear-gradient(180deg, #e9e9ec 0%, #8a8a90 100%);"></div>
+        <div class="swatch-body">
+          <div class="swatch-name">Text</div>
+          <div class="swatch-use">--text (primary) / --text-dim (secondary)</div>
+          <div class="swatch-hex">#e9e9ec · #8a8a90</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <h2>Materials</h2>
+    <p class="note">Six surfaces, each doing one job — no material is spread thin across the whole face.</p>
+    <div class="material-grid">
+      <div class="material">
+        <div class="material-swatch" style="background:linear-gradient(165deg, #1a1a1c 0%, #101012 60%, #08080a 100%);"></div>
+        <div class="material-label">Matte black chassis</div>
+      </div>
+      <div class="material">
+        <div class="material-swatch" style="background:linear-gradient(160deg, #d9b571 0%, #a3814f 50%, #6b4f28 100%);"></div>
+        <div class="material-label">Cast / polished bronze</div>
+      </div>
+      <div class="material">
+        <div class="material-swatch" style="background:radial-gradient(circle at 35% 30%, #faf7ef 0%, #ece5d3 45%, #cec5ac 80%, #b0a88f 100%);"></div>
+        <div class="material-label">Bone / marble ivory</div>
+      </div>
+      <div class="material">
+        <div class="material-swatch" style="background:linear-gradient(160deg, #b03a28 0%, #7a1810 40%, #2a0805 100%);"></div>
+        <div class="material-label">Dark oxblood glass</div>
+      </div>
+      <div class="material">
+        <div class="material-swatch" style="background:linear-gradient(160deg, #8d9096 0%, #55575c 45%, #3a3b3f 100%);"></div>
+        <div class="material-label">Gunmetal steel</div>
+      </div>
+      <div class="material">
+        <div class="material-swatch" style="background:linear-gradient(135deg, #0f52ba 0%, #0f52ba 48%, #5c1f78 52%, #5c1f78 100%);"></div>
+        <div class="material-label">Two single-accent gems</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Spacing &amp; Radius</h2>
+    <table class="kv-table">
+      <tr><td>Base unit</td><td><code>--pad-size: clamp(41.4–57.6px)</code> — desktop range; shrinks further below that via a width-aware formula so mobile still fits. <code>--pad-gap: pad-size / 2</code>.</td></tr>
+      <tr><td>Grid logic</td><td>Buttons/knobs/pads are 1 square · fader ≈ 2 squares + a gap · SHIFT/FX are half a square. Nearly every other dimension (icon-grid squares, label widths, font sizes) is a <code>calc()</code> off this one variable.</td></tr>
+    </table>
+    <div class="radius-row" style="margin-top:20px;">
+      <div class="radius-item">
+        <div class="radius-box" style="border-radius:6px;"></div>
+        <div class="radius-label">Chassis — 6px</div>
+      </div>
+      <div class="radius-item">
+        <div class="radius-box" style="border-radius:2px;"></div>
+        <div class="radius-label">Buttons/pads/chips — 2px</div>
+      </div>
+      <div class="radius-item">
+        <div class="radius-box" style="border-radius:50%;"></div>
+        <div class="radius-label">Knobs/LEDs — 50%</div>
+      </div>
+      <div class="radius-item">
+        <div class="radius-box" style="border-radius:0 6px 0 0;"></div>
+        <div class="radius-label">Grille — 0/6px/0/0</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>States</h2>
+    <table class="kv-table">
+      <tr><td>Engaged</td><td>Steady on — red edge-ring glow only, no fill/LED</td></tr>
+      <tr><td>Flash</td><td>On press — momentary red bottom-bloom, fades 0.25s</td></tr>
+      <tr><td>Two-tier buttons</td><td>REC/ERASE, RPT/LATCH, TIME/CORR — interaction scoped to the top chip only; bottom chip is a non-clickable print</td></tr>
+      <tr><td>SHIFT</td><td>Physically depresses when engaged, not just a glow</td></tr>
+      <tr><td>Knobs</td><td>Endless rotation, decoupled from the clamped value range</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>Motion</h2>
+    <p class="note">No boot/entrance animation currently — the machine renders instantly at full opacity. Several approaches (whole-machine blur/fade, a melting bronze-shell cover, per-control stagger) were tried and pulled back out. If revisited: keep it to a single animation on <code>#instrument</code>, not per-control staggering — that read as "chunky" in practice.</p>
+  </section>
+
+  <footer>
+    Lucilla Aurelius Launchpad — design system reference. Generated from the live <code>style.css</code>, not written from memory.
+  </footer>
+
+</div>
+</body>
+</html>

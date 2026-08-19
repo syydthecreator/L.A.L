@@ -217,6 +217,12 @@ body{
   height:calc(2.5 * var(--pad-size) + clamp(7px, 1.1dvh, 11px));
   margin-bottom:calc(-1 * clamp(7px, 1.1dvh, 11px));
   flex-shrink:0;
+  /* same background as .lcd (see below) — the header and the screen
+     are now one continuous black surface rather than two panels
+     meeting at a seam, so a glow from the icon grid (like the shield
+     icon's) has room to bleed upward with nothing to visibly cut it
+     off against. */
+  background:linear-gradient(165deg, #1a1a1c 0%, #101012 60%, #08080a 100%);
 }
 
 .brand-block{
@@ -288,6 +294,12 @@ body{
 /* ---------- lcd screen ---------- */
 
 .lcd{
+  /* positioned (not just static) so it paints in DOM order alongside
+     .header-row instead of always losing to it whenever their boxes
+     overlap — .header-row is position:relative, and a positioned
+     sibling otherwise always paints above a plain static one
+     regardless of DOM order. */
+  position:relative;
   margin-left:calc(-1 * var(--pad-size) / 2);
   margin-right:calc(-1 * var(--pad-size) / 2);
   border-radius:0;
@@ -299,7 +311,11 @@ body{
   padding-left:calc(var(--pad-size) / 2 + 10px);
   padding-right:calc(var(--pad-size) / 2 + 10px);
   background:linear-gradient(165deg, #1a1a1c 0%, #101012 60%, #08080a 100%);
-  border-top:1px solid #000;
+  /* no top border/seam here on purpose — .header-row shares this same
+     background (see below) so the header and the screen read as one
+     continuous black surface with no dividing edge for a control's
+     glow (like the shield icon's) to run into as it bleeds upward.
+     Icon/label sizing is untouched — this is background/border only. */
   border-bottom:1px solid #000;
   box-shadow:inset 0 2px 4px rgba(0,0,0,0.6), inset 0 0 14px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.04);
 }
@@ -517,7 +533,12 @@ body{
   height:var(--shield-w);
   filter:none;
 }
-.lcd-shield-icon svg{ display:block; width:100%; height:100%; }
+/* svg elements clip to their own viewport by default (UA stylesheet
+   overflow:hidden) — without overriding that here, the quadrants'
+   drop-shadow glow gets hard-cut at the icon's own box edge (the
+   shield's 3-icon-square), instead of bleeding out into the LCD like
+   every other glow on the face. */
+.lcd-shield-icon svg{ display:block; width:100%; height:100%; overflow:visible; }
 .lcd-shield-icon .shield-quadrant path{
   fill:rgba(255,255,255,0.22);
   transition:fill 0.25s ease, filter 0.25s ease;
